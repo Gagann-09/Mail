@@ -8,7 +8,9 @@ An original email web application organized around human intent, attention, and 
 
 **Phase 2 — UX Architecture** (approved)
 
-**Phase 3 — Design System** (complete, awaiting Phase 4 approval)
+**Phase 3 — Design System** (approved)
+
+**Phase 4 — Technical Architecture** (complete, awaiting Phase 5 approval)
 
 No implementation has been authorized.
 
