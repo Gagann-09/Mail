@@ -1,0 +1,60 @@
+# =============================================================================
+# MAIL Repository - .gitignore
+# =============================================================================
+
+# Project Specification & Source of Truth (Local Only)
+PRD.md
+architecture.md
+Architecture.md
+design.md
+rules.md
+tasks.md
+memory.md
+
+# Phase 0 & Phase 1 Research, Reports & Product Definitions
+Phase 0 Report*.md
+Phase 1 Product Definition*.md
+mail_phase_0_1_reaudit*.md
+
+# Competitor Research & UX Memos
+*memo.md
+*workflow*.md
+*assessment*.md
+Apple Mail*.md
+Fastmail*.md
+Gmail*.md
+Microsoft Outlook*.md
+Mozilla Thunderbird*.md
+Proton Mail*.md
+Roundcube*.md
+Yahoo Mail*.md
+
+# Rule: Ignore all other markdown files except README.md
+*.md
+!README.md
+
+# Environment and sensitive credentials
+.env
+.env.*
+*.env
+*.secret
+*.pem
+*.key
+credentials/
+secrets/
+
+# Build, dependency, and temporary artifacts
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.tmp
+*.bak
+*.swp
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
