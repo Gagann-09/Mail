@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { encryptProviderCredentials, decryptProviderCredentials } from '../../src/security/kms';
-import { MockProvider } from '../../src/providers/mockProvider';
+import { DemoProvider } from '../../src/providers/demoProvider';
 import { IProviderAdapter } from '../../src/providers/IProviderAdapter';
 
 describe('Authentication Boundary and Provider Abstraction', () => {
@@ -15,27 +15,43 @@ describe('Authentication Boundary and Provider Abstraction', () => {
     expect(decrypted).toBe(rawCredentials);
   });
 
-  it('mock provider authenticates and returns normalized credentials', async () => {
-    const provider: IProviderAdapter = new MockProvider();
+  it('demo provider authenticates and returns normalized credentials', async () => {
+    const provider: IProviderAdapter = new DemoProvider();
     const creds = await provider.authenticate('valid_code');
-    expect(creds.accessToken).toBe('mock_access_token');
+    expect(creds.accessToken).toBe('demo_access_token');
   });
 
-  it('mock provider syncs agnostic domain messages, not provider-specific structures', async () => {
-    const provider: IProviderAdapter = new MockProvider();
+  it('demo provider syncs agnostic domain messages, not provider-specific structures', async () => {
+    const provider: IProviderAdapter = new DemoProvider();
     const result = await provider.syncMailbox();
     
-    expect(result.messages.length).toBe(1);
+    expect(result.messages.length).toBe(2);
     const msg = result.messages[0];
     
     // Verify provider specific concepts don't leak (e.g., Gmail's 'labelIds' should not exist in the domain model)
     expect((msg as any).labelIds).toBeUndefined();
-    expect(msg.providerId).toBe('provider-123');
-    expect(msg.from.email).toBe('test@example.com');
+    expect(msg.providerId).toBe('demo-prov-1');
+    expect(msg.from.email).toBe('alice@example.com');
+  });
+
+  it('demo provider tracks state changes for mutation and sending', async () => {
+    const provider: IProviderAdapter = new DemoProvider();
+    await provider.mutateMessage('demo-prov-1', 'trash');
+    
+    // Perform a new sync to verify it was removed from the mailbox view
+    const newSync = await provider.syncMailbox();
+    expect(newSync.messages.length).toBe(1);
+    expect(newSync.messages[0].providerId).toBe('demo-prov-2');
+    
+    // Send a message
+    await provider.sendMessage({ to: ['new@example.com'], subject: 'Hello', body: 'Test' });
+    const finalSync = await provider.syncMailbox();
+    expect(finalSync.messages.length).toBe(2);
+    expect(finalSync.messages[1].subject).toBe('Hello');
   });
 
   it('fails authentication at the boundary on invalid code', async () => {
-    const provider: IProviderAdapter = new MockProvider();
+    const provider: IProviderAdapter = new DemoProvider();
     await expect(provider.authenticate('invalid_code')).rejects.toThrow('Authentication failed');
   });
 });

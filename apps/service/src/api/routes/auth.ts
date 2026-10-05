@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { encryptProviderCredentials } from '../../security/kms';
-import { MockProvider } from '../../providers/mockProvider';
+import { DemoProvider } from '../../providers/demoProvider';
 
 export const authRouter = Router();
 
@@ -13,7 +13,7 @@ authRouter.post('/callback', async (req: Request, res: Response): Promise<void> 
     }
 
     // In a real implementation, we would determine the provider based on the request or user context.
-    const provider = new MockProvider();
+    const provider = new DemoProvider();
     
     // Authenticate with the provider (never exposes raw OAuth flow to frontend)
     const credentials = await provider.authenticate(authCode);
