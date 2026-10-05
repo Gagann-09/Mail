@@ -4,7 +4,9 @@ An original email web application organized around human intent, attention, and 
 
 ## Status
 
-**Phase 1 — Product Definition** (complete, pending approval)
+**Phase 1 — Product Definition** (approved)
+
+**Phase 2 — UX Architecture** (in progress)
 
 No implementation has been authorized.
 
