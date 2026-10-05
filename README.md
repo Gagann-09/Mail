@@ -10,9 +10,9 @@ An original email web application organized around human intent, attention, and 
 
 **Phase 3 — Design System** (approved)
 
-**Phase 4 — Technical Architecture** (approved)
+**Phase 4.5 — Directory & File Structure** (approved)
 
-**Phase 4.5 — Directory & File Structure** (complete, awaiting Phase 5 approval)
+**Phase 5 — Core Implementation** (in progress)
 
 No implementation has been authorized.
 

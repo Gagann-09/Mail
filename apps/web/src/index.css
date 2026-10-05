@@ -1,0 +1,66 @@
+:root {
+  /* Colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F7F7;
+  --bg-tertiary: #EAEAEA;
+  --text-high: #111111;
+  --text-medium: #555555;
+  --text-low: #707070;
+  
+  --action-primary: #111111;
+  --action-primary-text: #FFFFFF;
+  --action-secondary: #DDDDDD;
+  
+  --status-actionable: #B03A00;
+  --status-waiting: #006299;
+  --status-reference: #555555;
+  --status-destructive: #B32400;
+
+  /* Borders */
+  --border-default: 1px solid #EAEAEA;
+  --border-divider: 1px solid #F0F0F0;
+  --focus-ring: 2px solid #111111;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Typography */
+  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-high);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Accessibility / Focus */
+*:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
