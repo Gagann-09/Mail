@@ -216,4 +216,36 @@ describe('MessageDetail', () => {
     trashBtn.click();
     expect(mockTrash).toHaveBeenCalledWith('t-1');
   });
+
+  it('calls spamConversation when Report Spam button is clicked', () => {
+    const mockSpam = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn(),
+      trashConversation: vi.fn(),
+      spamConversation: mockSpam
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ spamConversation: mockSpam });
+
+    render(<MessageDetail />);
+    const spamBtn = screen.getByTestId('spam-btn');
+    spamBtn.click();
+    expect(mockSpam).toHaveBeenCalledWith('t-1');
+  });
 });

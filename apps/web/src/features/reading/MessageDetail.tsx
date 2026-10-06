@@ -44,6 +44,13 @@ export function MessageDetail() {
           >
             Trash
           </button>
+          <button
+            data-testid="spam-btn"
+            onClick={() => useMailStore.getState().spamConversation(conversation.id)}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: 'transparent', color: 'var(--text-medium)', cursor: 'pointer', fontWeight: 500 }}
+          >
+            Report Spam
+          </button>
         </div>
       </header>
       

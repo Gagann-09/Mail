@@ -128,7 +128,7 @@ export class DemoProvider implements IProviderAdapter {
     this.historyCounter++;
   }
 
-  async mutateMessage(providerId: string, action: 'archive' | 'trash' | 'read' | 'unread'): Promise<void> {
+  async mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread'): Promise<void> {
     const msgIndex = this.inMemoryMessages.findIndex(m => m.providerId === providerId);
     if (msgIndex === -1) {
       throw new Error('Message not found on provider');
@@ -143,9 +143,14 @@ export class DemoProvider implements IProviderAdapter {
         msg.labels.push('ARCHIVE');
       }
     } else if (action === 'trash') {
-      msg.labels = msg.labels.filter(l => l !== 'INBOX' && l !== 'ARCHIVE');
+      msg.labels = msg.labels.filter(l => l !== 'INBOX' && l !== 'ARCHIVE' && l !== 'SPAM');
       if (!msg.labels.includes('TRASH')) {
         msg.labels.push('TRASH');
+      }
+    } else if (action === 'spam') {
+      msg.labels = msg.labels.filter(l => l !== 'INBOX' && l !== 'ARCHIVE' && l !== 'TRASH');
+      if (!msg.labels.includes('SPAM')) {
+        msg.labels.push('SPAM');
       }
     }
     
