@@ -28,6 +28,7 @@ export class DemoProvider implements IProviderAdapter {
         snippet: 'This is the first seeded message in the demo provider.',
         bodyHtml: '<p>Hello!</p><p>This is the <b>first seeded message</b> in the demo provider.</p>',
         date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        labels: ['INBOX'],
         hasAttachments: false,
       },
       {
@@ -42,6 +43,7 @@ export class DemoProvider implements IProviderAdapter {
         snippet: 'Thanks Alice, glad to be here!',
         bodyHtml: '<p>Thanks Alice, glad to be here!</p>',
         date: new Date(Date.now() - 1000 * 60 * 50), // 50 mins ago
+        labels: ['INBOX'],
         hasAttachments: false,
       },
       {
@@ -56,6 +58,7 @@ export class DemoProvider implements IProviderAdapter {
         snippet: 'Please click the link below to verify your account.',
         bodyHtml: '<p>Please click the link below to verify your account.</p><a href="#">Verify Now</a>',
         date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+        labels: ['INBOX'],
         hasAttachments: true,
         attachments: [
           {
@@ -118,6 +121,7 @@ export class DemoProvider implements IProviderAdapter {
       subject: payload.subject,
       snippet: payload.body.substring(0, 100),
       date: new Date(),
+      labels: ['INBOX', 'SENT'],
       hasAttachments: false,
     };
     this.inMemoryMessages.push(newMsg);
@@ -130,9 +134,15 @@ export class DemoProvider implements IProviderAdapter {
       throw new Error('Message not found on provider');
     }
     
-    // In a real provider, this might move the email to a different folder or apply a label.
-    // In our mock, if action is trash, we remove it from sync scope.
-    if (action === 'trash') {
+    const msg = this.inMemoryMessages[msgIndex];
+    msg.labels = msg.labels || [];
+
+    if (action === 'archive') {
+      msg.labels = msg.labels.filter(l => l !== 'INBOX');
+      if (!msg.labels.includes('ARCHIVE')) {
+        msg.labels.push('ARCHIVE');
+      }
+    } else if (action === 'trash') {
       this.inMemoryMessages.splice(msgIndex, 1);
     }
     

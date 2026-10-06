@@ -10,6 +10,7 @@ export interface LocalMessage {
   snippet: string;
   bodyHtml?: string;
   date: Date;
+  labels?: string[];
   hasAttachments: boolean;
   attachments?: Attachment[];
 }

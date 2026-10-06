@@ -10,6 +10,7 @@ export interface Message {
   snippet: string;
   bodyHtml?: string;
   date: Date;
+  labels?: string[];
   hasAttachments: boolean;
   attachments?: Attachment[];
 }

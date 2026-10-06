@@ -145,12 +145,43 @@ describe('MessageDetail', () => {
       setComposing: vi.fn(),
       saveDraft: vi.fn(),
       clearDraft: vi.fn(),
-      sendMessage: vi.fn()
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn()
     });
 
     render(<MessageDetail />);
     expect(screen.getByTestId('attachment-att-1')).toBeInTheDocument();
     expect(screen.getByText('test_file.pdf')).toBeInTheDocument();
     expect(screen.getByText('(2 KB)')).toBeInTheDocument();
+  });
+
+  it('calls archiveConversation when Archive button is clicked', () => {
+    const mockArchive = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: mockArchive
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ archiveConversation: mockArchive });
+
+    render(<MessageDetail />);
+    const archiveBtn = screen.getByTestId('archive-btn');
+    archiveBtn.click();
+    expect(mockArchive).toHaveBeenCalledWith('t-1');
   });
 });

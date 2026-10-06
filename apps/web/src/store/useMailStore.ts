@@ -39,6 +39,7 @@ interface MailState {
   saveDraft: (key: string, draft: Draft) => void;
   clearDraft: (key: string) => void;
   sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
+  archiveConversation: (threadId: string) => Promise<void>;
 }
 
 function computeConversations(messages: LocalMessage[]): LocalConversation[] {
@@ -62,8 +63,11 @@ function computeConversations(messages: LocalMessage[]): LocalConversation[] {
     });
   });
   
-  convos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  return convos;
+  // Filter for INBOX only
+  const inboxConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX')));
+  
+  inboxConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return inboxConvos;
 }
 
 export const useMailStore = create<MailState>((set) => ({
@@ -101,6 +105,38 @@ export const useMailStore = create<MailState>((set) => ({
     } catch (err) {
       console.error(err);
       throw err;
+    }
+  },
+  archiveConversation: async (threadId) => {
+    try {
+      const state = useMailStore.getState();
+      const convo = state.conversations.find(c => c.id === threadId);
+      if (!convo) return;
+
+      const providerIds = convo.messages.map(m => m.providerId);
+      
+      // Optimistic UI update
+      set(s => {
+        const newConvos = s.conversations.filter(c => c.id !== threadId);
+        return {
+          conversations: newConvos,
+          selectedConversationId: s.selectedConversationId === threadId ? null : s.selectedConversationId
+        };
+      });
+
+      const response = await fetch('/api/messages/mutate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ providerIds, action: 'archive' })
+      });
+      if (!response.ok) throw new Error('Archive failed');
+
+      // Sync from truth
+      await state.fetchMessages();
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic update on failure by fetching again
+      await useMailStore.getState().fetchMessages();
     }
   },
   fetchMessages: async () => {

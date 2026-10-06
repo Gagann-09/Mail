@@ -29,3 +29,34 @@ messagesRouter.post('/send', async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ success: false, error: 'Failed to send message' });
   }
 });
+
+messagesRouter.post('/mutate', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { providerIds, action } = req.body;
+    if (!providerIds || !Array.isArray(providerIds) || !action) {
+      res.status(400).json({ success: false, error: 'Missing required fields' });
+      return;
+    }
+    
+    const validActions = ['archive', 'trash', 'read', 'unread'];
+    if (!validActions.includes(action)) {
+      res.status(400).json({ success: false, error: 'Invalid action' });
+      return;
+    }
+
+    // In a real implementation we would handle bulk updates efficiently
+    // For demo, we iterate
+    for (const providerId of providerIds) {
+      try {
+        await provider.mutateMessage(providerId, action as any);
+      } catch (err) {
+        // Ignore individual failures for the demo
+        console.error(`Failed to mutate message ${providerId}:`, err);
+      }
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to mutate messages' });
+  }
+});
