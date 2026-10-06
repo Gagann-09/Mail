@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 
 export function Composer() {
-  const { setComposing, sendMessage } = useMailStore();
+  const { setComposing, sendMessage, composeDefaults } = useMailStore();
   
-  const [to, setTo] = useState('');
-  const [subject, setSubject] = useState('');
+  const [to, setTo] = useState(composeDefaults?.to || '');
+  const [subject, setSubject] = useState(composeDefaults?.subject || '');
   const [body, setBody] = useState('');
   const [isWaiting, setIsWaiting] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -21,7 +21,7 @@ export function Composer() {
     setIsSending(true);
     
     try {
-      await sendMessage(to, subject, body, isWaiting);
+      await sendMessage(to, subject, body, isWaiting, composeDefaults?.threadId);
       setComposing(false);
     } catch (err) {
       setError('Failed to send. Please try again.');

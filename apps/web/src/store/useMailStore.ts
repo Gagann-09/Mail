@@ -8,6 +8,12 @@ export interface LocalConversation {
   updatedAt: Date;
 }
 
+export interface ComposeDefaults {
+  to: string;
+  subject: string;
+  threadId?: string;
+}
+
 interface MailState {
   messages: LocalMessage[];
   conversations: LocalConversation[];
@@ -15,10 +21,11 @@ interface MailState {
   error: string | null;
   selectedConversationId: string | null;
   isComposing: boolean;
+  composeDefaults: ComposeDefaults | null;
   fetchMessages: () => Promise<void>;
   selectConversation: (id: string | null) => void;
-  setComposing: (isComposing: boolean) => void;
-  sendMessage: (to: string, subject: string, body: string, isWaiting: boolean) => Promise<void>;
+  setComposing: (isComposing: boolean, defaults?: ComposeDefaults) => void;
+  sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
 }
 
 function computeConversations(messages: LocalMessage[]): LocalConversation[] {
@@ -52,15 +59,16 @@ export const useMailStore = create<MailState>((set) => ({
   loading: false,
   error: null,
   isComposing: false,
+  composeDefaults: null,
   selectedConversationId: null,
   selectConversation: (id) => set({ selectedConversationId: id }),
-  setComposing: (isComposing) => set({ isComposing }),
-  sendMessage: async (to, subject, body, isWaiting) => {
+  setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
+  sendMessage: async (to, subject, body, isWaiting, threadId) => {
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, body, isWaiting })
+        body: JSON.stringify({ to, subject, body, isWaiting, threadId })
       });
       if (!response.ok) {
         throw new Error('Failed to send message');

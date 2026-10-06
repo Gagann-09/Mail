@@ -94,4 +94,34 @@ describe('MessageDetail', () => {
     
     expect(screen.getByTestId('message-body-1')).toHaveTextContent('This is a test snippet');
   });
+
+  it('triggers setComposing with defaults when Reply is clicked', () => {
+    const mockSetComposing = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: mockSetComposing,
+      sendMessage: vi.fn()
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ setComposing: mockSetComposing });
+    
+    const { getByTestId } = render(<MessageDetail />);
+    
+    const replyBtn = getByTestId('reply-btn');
+    replyBtn.click();
+    
+    expect(mockSetComposing).toHaveBeenCalledWith(true, {
+      to: 'alice@test.com',
+      subject: 'Re: Hello World',
+      threadId: 't-1'
+    });
+  });
 });

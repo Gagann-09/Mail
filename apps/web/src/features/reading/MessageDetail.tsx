@@ -51,6 +51,23 @@ export function MessageDetail() {
           </div>
         ))}
       </div>
+      
+      <footer style={{ marginTop: 'var(--space-6)', display: 'flex', gap: 'var(--space-2)' }}>
+        <button 
+          data-testid="reply-btn"
+          onClick={() => {
+            const lastMsg = conversation.messages[conversation.messages.length - 1];
+            useMailStore.getState().setComposing(true, {
+              to: lastMsg.from.email,
+              subject: conversation.subject.startsWith('Re:') ? conversation.subject : `Re: ${conversation.subject}`,
+              threadId: conversation.id
+            });
+          }}
+          style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-high)', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Reply
+        </button>
+      </footer>
     </article>
   );
 }

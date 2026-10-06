@@ -90,11 +90,11 @@ export class DemoProvider implements IProviderAdapter {
     };
   }
 
-  async sendMessage(payload: { to: string[]; subject: string; body: string }): Promise<void> {
+  async sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string }): Promise<void> {
     const newMsg: Message = {
       id: `msg-sent-${Date.now()}`,
       providerId: `demo-prov-${Date.now()}`,
-      threadId: `thread-sent-${Date.now()}`,
+      threadId: payload.threadId || `thread-sent-${Date.now()}`,
       from: { email: 'me@mail.local' },
       to: payload.to.map(email => ({ email })),
       cc: [],

@@ -30,7 +30,7 @@ export interface IProviderAdapter {
   /**
    * Sends a new email through the provider.
    */
-  sendMessage(payload: { to: string[]; subject: string; body: string }): Promise<void>;
+  sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string }): Promise<void>;
 
   /**
    * Mutates a message's state on the provider side (e.g., mark read, archive).

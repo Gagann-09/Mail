@@ -65,7 +65,7 @@ describe('Composer', () => {
     fireEvent.click(screen.getByTestId('composer-send'));
 
     await waitFor(() => {
-      expect(mockSendMessage).toHaveBeenCalledWith('test@test.com', 'Hello', 'Testing body', true);
+      expect(mockSendMessage).toHaveBeenCalledWith('test@test.com', 'Hello', 'Testing body', true, undefined);
     });
     
     expect(mockSetComposing).toHaveBeenCalledWith(false);

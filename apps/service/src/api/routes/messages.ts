@@ -18,12 +18,12 @@ messagesRouter.get('/', async (req: Request, res: Response): Promise<void> => {
 
 messagesRouter.post('/send', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { to, subject, body } = req.body;
+    const { to, subject, body, threadId } = req.body;
     if (!to || !subject || !body) {
       res.status(400).json({ success: false, error: 'Missing required fields' });
       return;
     }
-    await provider.sendMessage({ to: Array.isArray(to) ? to : [to], subject, body });
+    await provider.sendMessage({ to: Array.isArray(to) ? to : [to], subject, body, threadId });
     res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to send message' });
