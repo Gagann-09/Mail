@@ -43,6 +43,16 @@ export function MessageDetail() {
                 {new Date(message.date).toLocaleString()}
               </time>
             </div>
+            {message.hasAttachments && message.attachments && message.attachments.length > 0 && (
+              <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
+                {message.attachments.map(att => (
+                  <div key={att.id} data-testid={`attachment-${att.id}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-secondary)', fontSize: '13px' }}>
+                    <span style={{ fontWeight: 500 }}>{att.filename}</span>
+                    <span style={{ color: 'var(--text-medium)' }}>({Math.round(att.size / 1024)} KB)</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div 
               style={{ color: 'var(--text-high)', fontSize: '15px', lineHeight: 1.6 }}
               data-testid={`message-body-${message.id}`}

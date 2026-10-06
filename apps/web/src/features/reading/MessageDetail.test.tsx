@@ -24,7 +24,10 @@ describe('MessageDetail', () => {
         snippet: 'This is a test snippet',
         bodyHtml: '<p>This is the full body</p>',
         date: new Date('2023-01-01T12:00:00Z'),
-        hasAttachments: false,
+        hasAttachments: true,
+        attachments: [
+          { id: 'att-1', filename: 'test_file.pdf', contentType: 'application/pdf', size: 2048 }
+        ]
       }
     ]
   };
@@ -123,5 +126,31 @@ describe('MessageDetail', () => {
       subject: 'Re: Hello World',
       threadId: 't-1'
     });
+  });
+
+  it('renders attachments if present', () => {
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn()
+    });
+
+    render(<MessageDetail />);
+    expect(screen.getByTestId('attachment-att-1')).toBeInTheDocument();
+    expect(screen.getByText('test_file.pdf')).toBeInTheDocument();
+    expect(screen.getByText('(2 KB)')).toBeInTheDocument();
   });
 });

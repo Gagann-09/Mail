@@ -11,6 +11,15 @@ export interface Message {
   bodyHtml?: string;
   date: Date;
   hasAttachments: boolean;
+  attachments?: Attachment[];
+}
+
+export interface Attachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  size: number;
+  url?: string;
 }
 
 export interface Contact {

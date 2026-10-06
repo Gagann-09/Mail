@@ -57,6 +57,22 @@ export class DemoProvider implements IProviderAdapter {
         bodyHtml: '<p>Please click the link below to verify your account.</p><a href="#">Verify Now</a>',
         date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
         hasAttachments: true,
+        attachments: [
+          {
+            id: 'att-1',
+            filename: 'Verification_Guide.pdf',
+            contentType: 'application/pdf',
+            size: 153600, // 150KB
+            url: '#mock-url-1',
+          },
+          {
+            id: 'att-2',
+            filename: 'logo.png',
+            contentType: 'image/png',
+            size: 45000,
+            url: '#mock-url-2',
+          }
+        ]
       },
     ];
   }
