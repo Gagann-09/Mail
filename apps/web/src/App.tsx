@@ -1,3 +1,5 @@
+import { MessageList } from './features/reading/MessageList';
+
 export function App() {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
@@ -12,9 +14,9 @@ export function App() {
         </ul>
       </nav>
       {/* Main Content Placeholder */}
-      <main style={{ flex: 1, padding: 'var(--space-8)' }}>
+      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 500, marginBottom: 'var(--space-4)' }}>Attention</h2>
-        <p style={{ color: 'var(--text-medium)', fontSize: '14px' }}>Inbox is empty.</p>
+        <MessageList />
       </main>
     </div>
   );
