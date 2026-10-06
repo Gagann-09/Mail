@@ -8,6 +8,7 @@ export interface Message {
   bcc: Contact[];
   subject: string;
   snippet: string;
+  bodyHtml?: string;
   date: Date;
   hasAttachments: boolean;
 }

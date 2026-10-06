@@ -26,6 +26,7 @@ export class DemoProvider implements IProviderAdapter {
         bcc: [],
         subject: 'Welcome to the Demo!',
         snippet: 'This is the first seeded message in the demo provider.',
+        bodyHtml: '<p>Hello!</p><p>This is the <b>first seeded message</b> in the demo provider.</p>',
         date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
         hasAttachments: false,
       },
@@ -39,6 +40,7 @@ export class DemoProvider implements IProviderAdapter {
         bcc: [],
         subject: 'Action Required: Verify Account',
         snippet: 'Please click the link below to verify your account.',
+        bodyHtml: '<p>Please click the link below to verify your account.</p><a href="#">Verify Now</a>',
         date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
         hasAttachments: true,
       },

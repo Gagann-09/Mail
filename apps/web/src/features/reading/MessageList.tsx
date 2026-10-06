@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 
 export function MessageList() {
-  const { messages, loading, error, fetchMessages } = useMailStore();
+  const { messages, loading, error, fetchMessages, selectMessage, selectedMessageId } = useMailStore();
 
   useEffect(() => {
     fetchMessages();
@@ -22,13 +22,18 @@ export function MessageList() {
 
   return (
     <ul style={{ listStyle: 'none', padding: 0 }} data-testid="message-list">
-      {messages.map(msg => (
+      {messages.map(msg => {
+        const isSelected = msg.id === selectedMessageId;
+        return (
         <li 
           key={msg.id} 
+          onClick={() => selectMessage(msg.id)}
+          data-testid={`msg-${msg.id}`}
           style={{ 
             padding: 'var(--space-4)', 
             borderBottom: 'var(--border-default)',
             cursor: 'pointer',
+            backgroundColor: isSelected ? 'var(--bg-secondary)' : 'transparent',
             display: 'flex',
             flexDirection: 'column',
             gap: 'var(--space-1)'
@@ -45,7 +50,8 @@ export function MessageList() {
             {msg.snippet}
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

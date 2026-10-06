@@ -5,13 +5,17 @@ interface MailState {
   messages: LocalMessage[];
   loading: boolean;
   error: string | null;
+  selectedMessageId: string | null;
   fetchMessages: () => Promise<void>;
+  selectMessage: (id: string | null) => void;
 }
 
 export const useMailStore = create<MailState>((set) => ({
   messages: [],
   loading: false,
   error: null,
+  selectedMessageId: null,
+  selectMessage: (id) => set({ selectedMessageId: id }),
   fetchMessages: async () => {
     set({ loading: true, error: null });
     try {

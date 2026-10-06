@@ -8,6 +8,7 @@ export interface LocalMessage {
   to: { email: string; name?: string }[];
   subject: string;
   snippet: string;
+  bodyHtml?: string;
   date: Date;
   hasAttachments: boolean;
 }
