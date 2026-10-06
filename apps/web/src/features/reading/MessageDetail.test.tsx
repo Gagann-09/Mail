@@ -174,7 +174,8 @@ describe('MessageDetail', () => {
       saveDraft: vi.fn(),
       clearDraft: vi.fn(),
       sendMessage: vi.fn(),
-      archiveConversation: mockArchive
+      archiveConversation: mockArchive,
+      trashConversation: vi.fn()
     });
     
     storeModule.useMailStore.getState = vi.fn().mockReturnValue({ archiveConversation: mockArchive });
@@ -183,5 +184,36 @@ describe('MessageDetail', () => {
     const archiveBtn = screen.getByTestId('archive-btn');
     archiveBtn.click();
     expect(mockArchive).toHaveBeenCalledWith('t-1');
+  });
+
+  it('calls trashConversation when Trash button is clicked', () => {
+    const mockTrash = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn(),
+      trashConversation: mockTrash
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ trashConversation: mockTrash });
+
+    render(<MessageDetail />);
+    const trashBtn = screen.getByTestId('trash-btn');
+    trashBtn.click();
+    expect(mockTrash).toHaveBeenCalledWith('t-1');
   });
 });

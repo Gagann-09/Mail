@@ -143,7 +143,10 @@ export class DemoProvider implements IProviderAdapter {
         msg.labels.push('ARCHIVE');
       }
     } else if (action === 'trash') {
-      this.inMemoryMessages.splice(msgIndex, 1);
+      msg.labels = msg.labels.filter(l => l !== 'INBOX' && l !== 'ARCHIVE');
+      if (!msg.labels.includes('TRASH')) {
+        msg.labels.push('TRASH');
+      }
     }
     
     this.historyCounter++;

@@ -38,16 +38,18 @@ describe('Authentication Boundary and Provider Abstraction', () => {
     const provider: IProviderAdapter = new DemoProvider();
     await provider.mutateMessage('demo-prov-1', 'trash');
     
-    // Perform a new sync to verify it was removed from the mailbox view
+    // Perform a new sync to verify it was updated
     const newSync = await provider.syncMailbox();
-    expect(newSync.messages.length).toBe(2);
-    expect(newSync.messages[0].providerId).toBe('demo-prov-1-reply');
+    expect(newSync.messages.length).toBe(3);
+    const trashedMsg = newSync.messages.find(m => m.providerId === 'demo-prov-1');
+    expect(trashedMsg?.labels).toContain('TRASH');
+    expect(trashedMsg?.labels).not.toContain('INBOX');
     
     // Send a message
     await provider.sendMessage({ to: ['new@example.com'], subject: 'Hello', body: 'Test' });
     const finalSync = await provider.syncMailbox();
-    expect(finalSync.messages.length).toBe(3);
-    expect(finalSync.messages[2].subject).toBe('Hello');
+    expect(finalSync.messages.length).toBe(4);
+    expect(finalSync.messages[3].subject).toBe('Hello');
   });
 
   it('fails authentication at the boundary on invalid code', async () => {

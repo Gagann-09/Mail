@@ -29,13 +29,22 @@ export function MessageDetail() {
         <h1 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-high)', margin: 0 }}>
           {conversation.subject}
         </h1>
-        <button
-          data-testid="archive-btn"
-          onClick={() => useMailStore.getState().archiveConversation(conversation.id)}
-          style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: 'transparent', color: 'var(--text-medium)', cursor: 'pointer', fontWeight: 500 }}
-        >
-          Archive
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <button
+            data-testid="archive-btn"
+            onClick={() => useMailStore.getState().archiveConversation(conversation.id)}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: 'transparent', color: 'var(--text-medium)', cursor: 'pointer', fontWeight: 500 }}
+          >
+            Archive
+          </button>
+          <button
+            data-testid="trash-btn"
+            onClick={() => useMailStore.getState().trashConversation(conversation.id)}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: 'transparent', color: 'var(--status-destructive)', cursor: 'pointer', fontWeight: 500 }}
+          >
+            Trash
+          </button>
+        </div>
       </header>
       
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>

@@ -40,6 +40,7 @@ interface MailState {
   clearDraft: (key: string) => void;
   sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
   archiveConversation: (threadId: string) => Promise<void>;
+  trashConversation: (threadId: string) => Promise<void>;
 }
 
 function computeConversations(messages: LocalMessage[]): LocalConversation[] {
@@ -130,6 +131,38 @@ export const useMailStore = create<MailState>((set) => ({
         body: JSON.stringify({ providerIds, action: 'archive' })
       });
       if (!response.ok) throw new Error('Archive failed');
+
+      // Sync from truth
+      await state.fetchMessages();
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic update on failure by fetching again
+      await useMailStore.getState().fetchMessages();
+    }
+  },
+  trashConversation: async (threadId) => {
+    try {
+      const state = useMailStore.getState();
+      const convo = state.conversations.find(c => c.id === threadId);
+      if (!convo) return;
+
+      const providerIds = convo.messages.map(m => m.providerId);
+      
+      // Optimistic UI update
+      set(s => {
+        const newConvos = s.conversations.filter(c => c.id !== threadId);
+        return {
+          conversations: newConvos,
+          selectedConversationId: s.selectedConversationId === threadId ? null : s.selectedConversationId
+        };
+      });
+
+      const response = await fetch('/api/messages/mutate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ providerIds, action: 'trash' })
+      });
+      if (!response.ok) throw new Error('Trash failed');
 
       // Sync from truth
       await state.fetchMessages();
