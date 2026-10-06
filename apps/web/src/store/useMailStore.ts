@@ -14,8 +14,11 @@ interface MailState {
   loading: boolean;
   error: string | null;
   selectedConversationId: string | null;
+  isComposing: boolean;
   fetchMessages: () => Promise<void>;
   selectConversation: (id: string | null) => void;
+  setComposing: (isComposing: boolean) => void;
+  sendMessage: (to: string, subject: string, body: string, isWaiting: boolean) => Promise<void>;
 }
 
 function computeConversations(messages: LocalMessage[]): LocalConversation[] {
@@ -48,8 +51,28 @@ export const useMailStore = create<MailState>((set) => ({
   conversations: [],
   loading: false,
   error: null,
+  isComposing: false,
   selectedConversationId: null,
   selectConversation: (id) => set({ selectedConversationId: id }),
+  setComposing: (isComposing) => set({ isComposing }),
+  sendMessage: async (to, subject, body, isWaiting) => {
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, body, isWaiting })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+      // Re-fetch messages after sending
+      const { fetchMessages } = useMailStore.getState();
+      await fetchMessages();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  },
   fetchMessages: async () => {
     set({ loading: true, error: null });
     try {
