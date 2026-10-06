@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MessageList } from './MessageList';
 import * as storeModule from '../../store/useMailStore';
-import { LocalMessage } from '../../db/schema';
+import { LocalConversation } from '../../store/useMailStore';
 
 // Mock the Zustand store hook
 vi.mock('../../store/useMailStore', () => ({
@@ -19,9 +19,12 @@ describe('MessageList', () => {
   it('renders loading state', () => {
     vi.mocked(storeModule.useMailStore).mockReturnValue({
       messages: [],
+      conversations: [],
       loading: true,
       error: null,
       fetchMessages: mockFetchMessages,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
     });
 
     render(<MessageList />);
@@ -32,47 +35,61 @@ describe('MessageList', () => {
   it('renders error state', () => {
     vi.mocked(storeModule.useMailStore).mockReturnValue({
       messages: [],
+      conversations: [],
       loading: false,
       error: 'Network Error',
       fetchMessages: mockFetchMessages,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
     });
 
     render(<MessageList />);
     expect(screen.getByTestId('error-state')).toHaveTextContent('Network Error');
   });
 
-  it('renders empty state when no messages', () => {
+  it('renders empty state when no conversations', () => {
     vi.mocked(storeModule.useMailStore).mockReturnValue({
       messages: [],
+      conversations: [],
       loading: false,
       error: null,
       fetchMessages: mockFetchMessages,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
     });
 
     render(<MessageList />);
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 
-  it('renders list of messages', () => {
-    const mockMessages: LocalMessage[] = [
+  it('renders list of conversations', () => {
+    const mockConvos: LocalConversation[] = [
       {
-        id: '1',
-        providerId: 'p-1',
-        threadId: 't-1',
-        from: { name: 'Alice', email: 'alice@test.com' },
-        to: [{ email: 'me@test.com' }],
+        id: 't-1',
         subject: 'Hello World',
-        snippet: 'This is a test snippet',
-        date: new Date('2023-01-01T12:00:00Z'),
-        hasAttachments: false,
-      },
+        updatedAt: new Date('2023-01-01T12:00:00Z'),
+        messages: [{
+          id: '1',
+          providerId: 'p-1',
+          threadId: 't-1',
+          from: { name: 'Alice', email: 'alice@test.com' },
+          to: [{ email: 'me@test.com' }],
+          subject: 'Hello World',
+          snippet: 'This is a test snippet',
+          date: new Date('2023-01-01T12:00:00Z'),
+          hasAttachments: false,
+        }]
+      }
     ];
 
     vi.mocked(storeModule.useMailStore).mockReturnValue({
-      messages: mockMessages,
+      messages: [],
+      conversations: mockConvos,
       loading: false,
       error: null,
       fetchMessages: mockFetchMessages,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
     });
 
     render(<MessageList />);

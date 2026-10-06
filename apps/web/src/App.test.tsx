@@ -5,9 +5,12 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('./store/useMailStore', () => ({
   useMailStore: vi.fn(() => ({
     messages: [],
+    conversations: [],
     loading: false,
     error: null,
     fetchMessages: vi.fn(),
+    selectedConversationId: null,
+    selectConversation: vi.fn(),
   })),
 }));
 

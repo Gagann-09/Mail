@@ -2,33 +2,36 @@ import { useEffect } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 
 export function MessageList() {
-  const { messages, loading, error, fetchMessages, selectMessage, selectedMessageId } = useMailStore();
+  const { conversations, loading, error, fetchMessages, selectConversation, selectedConversationId } = useMailStore();
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  if (loading && messages.length === 0) {
+  if (loading && conversations.length === 0) {
     return <div data-testid="loading-state" style={{ color: 'var(--text-medium)' }}>Loading messages...</div>;
   }
 
-  if (error && messages.length === 0) {
+  if (error && conversations.length === 0) {
     return <div data-testid="error-state" style={{ color: 'var(--status-destructive)' }}>{error}</div>;
   }
 
-  if (messages.length === 0) {
+  if (conversations.length === 0) {
     return <div data-testid="empty-state" style={{ color: 'var(--text-medium)' }}>Inbox is empty.</div>;
   }
 
   return (
     <ul style={{ listStyle: 'none', padding: 0 }} data-testid="message-list">
-      {messages.map(msg => {
-        const isSelected = msg.id === selectedMessageId;
+      {conversations.map(convo => {
+        const isSelected = convo.id === selectedConversationId;
+        const lastMsg = convo.messages[convo.messages.length - 1];
+        const participantNames = Array.from(new Set(convo.messages.map(m => m.from.name || m.from.email))).join(', ');
+        
         return (
         <li 
-          key={msg.id} 
-          onClick={() => selectMessage(msg.id)}
-          data-testid={`msg-${msg.id}`}
+          key={convo.id} 
+          onClick={() => selectConversation(convo.id)}
+          data-testid={`convo-${convo.id}`}
           style={{ 
             padding: 'var(--space-4)', 
             borderBottom: 'var(--border-default)',
@@ -40,14 +43,16 @@ export function MessageList() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600 }}>{msg.from.name || msg.from.email}</span>
+            <span style={{ fontWeight: 600 }}>
+              {participantNames} {convo.messages.length > 1 && <span style={{ color: 'var(--text-medium)', fontWeight: 'normal' }}>({convo.messages.length})</span>}
+            </span>
             <span style={{ fontSize: '12px', color: 'var(--text-medium)' }}>
-              {new Date(msg.date).toLocaleDateString()}
+              {new Date(convo.updatedAt).toLocaleDateString()}
             </span>
           </div>
-          <div style={{ fontWeight: 500, color: 'var(--text-high)' }}>{msg.subject}</div>
+          <div style={{ fontWeight: 500, color: 'var(--text-high)' }}>{convo.subject}</div>
           <div style={{ fontSize: '14px', color: 'var(--text-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {msg.snippet}
+            {lastMsg.snippet}
           </div>
         </li>
         );

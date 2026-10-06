@@ -31,6 +31,20 @@ export class DemoProvider implements IProviderAdapter {
         hasAttachments: false,
       },
       {
+        id: 'msg-1-reply',
+        providerId: 'demo-prov-1-reply',
+        threadId: 'thread-1',
+        from: { name: 'Me', email: 'me@mail.local' },
+        to: [{ email: 'alice@example.com' }],
+        cc: [],
+        bcc: [],
+        subject: 'Re: Welcome to the Demo!',
+        snippet: 'Thanks Alice, glad to be here!',
+        bodyHtml: '<p>Thanks Alice, glad to be here!</p>',
+        date: new Date(Date.now() - 1000 * 60 * 50), // 50 mins ago
+        hasAttachments: false,
+      },
+      {
         id: 'msg-2',
         providerId: 'demo-prov-2',
         threadId: 'thread-2',
