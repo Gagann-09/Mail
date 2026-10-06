@@ -4,7 +4,7 @@ import { Composer } from './features/compose/Composer';
 import { useMailStore } from './store/useMailStore';
 
 export function App() {
-  const { isComposing, setComposing, searchQuery, setSearchQuery } = useMailStore();
+  const { isComposing, setComposing, searchQuery, setSearchQuery, toastMessage, undoAction } = useMailStore();
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -53,6 +53,46 @@ export function App() {
 
       {/* Composer Modal/Drawer */}
       {isComposing && <Composer />}
+
+      {/* Undo Toast */}
+      {toastMessage && (
+        <div 
+          data-testid="undo-toast"
+          style={{
+            position: 'fixed',
+            bottom: 'var(--space-6)',
+            left: 'var(--space-6)',
+            backgroundColor: 'var(--text-high)',
+            color: 'var(--bg-primary)',
+            padding: 'var(--space-3) var(--space-4)',
+            borderRadius: 'var(--radius-md)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-4)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000
+          }}
+        >
+          <span style={{ fontWeight: 500 }}>{toastMessage}</span>
+          {undoAction && (
+            <button
+              data-testid="undo-btn"
+              onClick={undoAction}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'var(--bg-primary)',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontWeight: 600,
+                padding: 0
+              }}
+            >
+              Undo
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

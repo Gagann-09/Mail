@@ -41,7 +41,10 @@ interface MailState {
   sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
   archiveConversation: (threadId: string) => Promise<void>;
   trashConversation: (threadId: string) => Promise<void>;
-  spamConversation: (threadId: string) => Promise<void>;
+  spamConversation: (threadId: string) => void;
+  toastMessage: string | null;
+  undoAction: (() => void) | null;
+  clearToast: () => void;
 }
 
 function computeConversations(messages: LocalMessage[]): LocalConversation[] {
@@ -72,6 +75,56 @@ function computeConversations(messages: LocalMessage[]): LocalConversation[] {
   return inboxConvos;
 }
 
+let pendingActionTimeout: any = null;
+let commitPendingAction: (() => void) | null = null;
+
+function handleOptimisticMutate(threadId: string, action: 'archive' | 'trash' | 'spam', toastText: string) {
+  const state = useMailStore.getState();
+  const convo = state.conversations.find(c => c.id === threadId);
+  if (!convo) return;
+  const providerIds = convo.messages.map(m => m.providerId);
+  
+  if (commitPendingAction) commitPendingAction();
+
+  const originalConvos = state.conversations;
+  const originalSelectedId = state.selectedConversationId;
+
+  useMailStore.setState({
+    conversations: state.conversations.filter(c => c.id !== threadId),
+    selectedConversationId: state.selectedConversationId === threadId ? null : state.selectedConversationId,
+    toastMessage: toastText
+  });
+
+  const commitApi = async () => {
+    try {
+      const response = await fetch('/api/messages/mutate', { method: 'POST', body: JSON.stringify({ providerIds, action }), headers: { 'Content-Type': 'application/json' } });
+      if (!response.ok) throw new Error(`${action} failed`);
+      await useMailStore.getState().fetchMessages();
+    } catch (err) {
+      console.error(err);
+      await useMailStore.getState().fetchMessages(); // Revert on failure
+    }
+    useMailStore.getState().clearToast();
+    commitPendingAction = null;
+  };
+
+  commitPendingAction = commitApi;
+  pendingActionTimeout = setTimeout(() => {
+     if (commitPendingAction === commitApi) commitApi();
+  }, 5000);
+
+  useMailStore.setState({
+    undoAction: () => {
+      if (pendingActionTimeout) clearTimeout(pendingActionTimeout);
+      if (commitPendingAction === commitApi) {
+        commitPendingAction = null;
+        useMailStore.setState({ conversations: originalConvos, selectedConversationId: originalSelectedId });
+        useMailStore.getState().clearToast();
+      }
+    }
+  });
+}
+
 export const useMailStore = create<MailState>((set) => ({
   messages: [],
   conversations: [],
@@ -82,6 +135,9 @@ export const useMailStore = create<MailState>((set) => ({
   drafts: {},
   searchQuery: '',
   selectedConversationId: null,
+  toastMessage: null,
+  undoAction: null,
+  clearToast: () => set({ toastMessage: null, undoAction: null }),
   selectConversation: (id) => set({ selectedConversationId: id }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
@@ -109,102 +165,9 @@ export const useMailStore = create<MailState>((set) => ({
       throw err;
     }
   },
-  archiveConversation: async (threadId) => {
-    try {
-      const state = useMailStore.getState();
-      const convo = state.conversations.find(c => c.id === threadId);
-      if (!convo) return;
-
-      const providerIds = convo.messages.map(m => m.providerId);
-      
-      // Optimistic UI update
-      set(s => {
-        const newConvos = s.conversations.filter(c => c.id !== threadId);
-        return {
-          conversations: newConvos,
-          selectedConversationId: s.selectedConversationId === threadId ? null : s.selectedConversationId
-        };
-      });
-
-      const response = await fetch('/api/messages/mutate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerIds, action: 'archive' })
-      });
-      if (!response.ok) throw new Error('Archive failed');
-
-      // Sync from truth
-      await state.fetchMessages();
-    } catch (err) {
-      console.error(err);
-      // Revert optimistic update on failure by fetching again
-      await useMailStore.getState().fetchMessages();
-    }
-  },
-  trashConversation: async (threadId) => {
-    try {
-      const state = useMailStore.getState();
-      const convo = state.conversations.find(c => c.id === threadId);
-      if (!convo) return;
-
-      const providerIds = convo.messages.map(m => m.providerId);
-      
-      // Optimistic UI update
-      set(s => {
-        const newConvos = s.conversations.filter(c => c.id !== threadId);
-        return {
-          conversations: newConvos,
-          selectedConversationId: s.selectedConversationId === threadId ? null : s.selectedConversationId
-        };
-      });
-
-      const response = await fetch('/api/messages/mutate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerIds, action: 'trash' })
-      });
-      if (!response.ok) throw new Error('Trash failed');
-
-      // Sync from truth
-      await state.fetchMessages();
-    } catch (err) {
-      console.error(err);
-      // Revert optimistic update on failure by fetching again
-      await useMailStore.getState().fetchMessages();
-    }
-  },
-  spamConversation: async (threadId) => {
-    try {
-      const state = useMailStore.getState();
-      const convo = state.conversations.find(c => c.id === threadId);
-      if (!convo) return;
-
-      const providerIds = convo.messages.map(m => m.providerId);
-      
-      // Optimistic UI update
-      set(s => {
-        const newConvos = s.conversations.filter(c => c.id !== threadId);
-        return {
-          conversations: newConvos,
-          selectedConversationId: s.selectedConversationId === threadId ? null : s.selectedConversationId
-        };
-      });
-
-      const response = await fetch('/api/messages/mutate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerIds, action: 'spam' })
-      });
-      if (!response.ok) throw new Error('Spam reporting failed');
-
-      // Sync from truth
-      await state.fetchMessages();
-    } catch (err) {
-      console.error(err);
-      // Revert optimistic update on failure by fetching again
-      await useMailStore.getState().fetchMessages();
-    }
-  },
+  archiveConversation: (threadId) => handleOptimisticMutate(threadId, 'archive', 'Conversation archived'),
+  trashConversation: (threadId) => handleOptimisticMutate(threadId, 'trash', 'Conversation moved to trash'),
+  spamConversation: (threadId) => handleOptimisticMutate(threadId, 'spam', 'Conversation marked as spam'),
   fetchMessages: async () => {
     set({ loading: true, error: null });
     try {
