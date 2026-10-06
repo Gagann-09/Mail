@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 
 export function Composer() {
-  const { setComposing, sendMessage, composeDefaults } = useMailStore();
+  const { setComposing, sendMessage, composeDefaults, drafts, saveDraft, clearDraft } = useMailStore();
   
-  const [to, setTo] = useState(composeDefaults?.to || '');
-  const [subject, setSubject] = useState(composeDefaults?.subject || '');
-  const [body, setBody] = useState('');
-  const [isWaiting, setIsWaiting] = useState(false);
+  const draftKey = composeDefaults?.threadId || 'new';
+  const existingDraft = drafts[draftKey];
+  
+  const [to, setTo] = useState(existingDraft?.to ?? composeDefaults?.to ?? '');
+  const [subject, setSubject] = useState(existingDraft?.subject ?? composeDefaults?.subject ?? '');
+  const [body, setBody] = useState(existingDraft?.body ?? '');
+  const [isWaiting, setIsWaiting] = useState(existingDraft?.isWaiting ?? false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-save draft on change
+  useEffect(() => {
+    saveDraft(draftKey, {
+      to,
+      subject,
+      body,
+      isWaiting,
+      threadId: composeDefaults?.threadId
+    });
+  }, [to, subject, body, isWaiting, draftKey, saveDraft, composeDefaults?.threadId]);
 
   const handleSend = async () => {
     if (!to || !body) {
@@ -22,6 +36,7 @@ export function Composer() {
     
     try {
       await sendMessage(to, subject, body, isWaiting, composeDefaults?.threadId);
+      clearDraft(draftKey);
       setComposing(false);
     } catch (err) {
       setError('Failed to send. Please try again.');

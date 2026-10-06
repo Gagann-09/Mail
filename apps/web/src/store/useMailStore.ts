@@ -14,6 +14,14 @@ export interface ComposeDefaults {
   threadId?: string;
 }
 
+export interface Draft {
+  to: string;
+  subject: string;
+  body: string;
+  isWaiting: boolean;
+  threadId?: string;
+}
+
 interface MailState {
   messages: LocalMessage[];
   conversations: LocalConversation[];
@@ -22,9 +30,12 @@ interface MailState {
   selectedConversationId: string | null;
   isComposing: boolean;
   composeDefaults: ComposeDefaults | null;
+  drafts: Record<string, Draft>;
   fetchMessages: () => Promise<void>;
   selectConversation: (id: string | null) => void;
   setComposing: (isComposing: boolean, defaults?: ComposeDefaults) => void;
+  saveDraft: (key: string, draft: Draft) => void;
+  clearDraft: (key: string) => void;
   sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
 }
 
@@ -60,9 +71,16 @@ export const useMailStore = create<MailState>((set) => ({
   error: null,
   isComposing: false,
   composeDefaults: null,
+  drafts: {},
   selectedConversationId: null,
   selectConversation: (id) => set({ selectedConversationId: id }),
   setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
+  saveDraft: (key, draft) => set((state) => ({ drafts: { ...state.drafts, [key]: draft } })),
+  clearDraft: (key) => set((state) => {
+    const newDrafts = { ...state.drafts };
+    delete newDrafts[key];
+    return { drafts: newDrafts };
+  }),
   sendMessage: async (to, subject, body, isWaiting, threadId) => {
     try {
       const response = await fetch('/api/messages/send', {

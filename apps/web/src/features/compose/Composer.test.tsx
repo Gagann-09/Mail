@@ -10,15 +10,21 @@ vi.mock('../../store/useMailStore', () => ({
 describe('Composer', () => {
   const mockSetComposing = vi.fn();
   const mockSendMessage = vi.fn();
+  const mockSaveDraft = vi.fn();
+  const mockClearDraft = vi.fn();
 
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(storeModule.useMailStore).mockReturnValue({
       isComposing: true,
+      composeDefaults: null,
       setComposing: mockSetComposing,
       sendMessage: mockSendMessage,
       messages: [],
       conversations: [],
+      drafts: {},
+      saveDraft: mockSaveDraft,
+      clearDraft: mockClearDraft,
       loading: false,
       error: null,
       selectedConversationId: null,
@@ -84,5 +90,31 @@ describe('Composer', () => {
       expect(screen.getByTestId('composer-error')).toHaveTextContent('Failed to send. Please try again.');
     });
     expect(mockSetComposing).not.toHaveBeenCalled();
+  });
+
+  it('loads existing draft data on mount', () => {
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      isComposing: true,
+      composeDefaults: { to: 'default@test.com', subject: 'Default', threadId: 't-1' },
+      setComposing: mockSetComposing,
+      sendMessage: mockSendMessage,
+      messages: [],
+      conversations: [],
+      drafts: {
+        't-1': { to: 'draft@test.com', subject: 'Draft Sub', body: 'Draft body', isWaiting: false, threadId: 't-1' }
+      },
+      saveDraft: mockSaveDraft,
+      clearDraft: mockClearDraft,
+      loading: false,
+      error: null,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
+      fetchMessages: vi.fn(),
+    });
+
+    render(<Composer />);
+    expect(screen.getByTestId('composer-to')).toHaveValue('draft@test.com');
+    expect(screen.getByTestId('composer-subject')).toHaveValue('Draft Sub');
+    expect(screen.getByTestId('composer-body')).toHaveValue('Draft body');
   });
 });
