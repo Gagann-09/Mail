@@ -2,11 +2,26 @@ import { useEffect } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 
 export function MessageList() {
-  const { conversations, loading, error, fetchMessages, selectConversation, selectedConversationId } = useMailStore();
+  const { conversations, loading, error, fetchMessages, selectConversation, selectedConversationId, searchQuery } = useMailStore();
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  const filteredConversations = conversations.filter(convo => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    
+    // Search subject
+    if (convo.subject.toLowerCase().includes(query)) return true;
+    
+    // Search messages
+    return convo.messages.some(msg => 
+      (msg.snippet && msg.snippet.toLowerCase().includes(query)) ||
+      (msg.from.name && msg.from.name.toLowerCase().includes(query)) ||
+      (msg.from.email && msg.from.email.toLowerCase().includes(query))
+    );
+  });
 
   if (loading && conversations.length === 0) {
     return <div data-testid="loading-state" style={{ color: 'var(--text-medium)' }}>Loading messages...</div>;
@@ -16,13 +31,13 @@ export function MessageList() {
     return <div data-testid="error-state" style={{ color: 'var(--status-destructive)' }}>{error}</div>;
   }
 
-  if (conversations.length === 0) {
-    return <div data-testid="empty-state" style={{ color: 'var(--text-medium)' }}>Inbox is empty.</div>;
+  if (filteredConversations.length === 0) {
+    return <div data-testid="empty-state" style={{ color: 'var(--text-medium)' }}>{searchQuery ? 'No results found.' : 'Inbox is empty.'}</div>;
   }
 
   return (
     <ul style={{ listStyle: 'none', padding: 0 }} data-testid="message-list">
-      {conversations.map(convo => {
+      {filteredConversations.map(convo => {
         const isSelected = convo.id === selectedConversationId;
         const lastMsg = convo.messages[convo.messages.length - 1];
         const participantNames = Array.from(new Set(convo.messages.map(m => m.from.name || m.from.email))).join(', ');

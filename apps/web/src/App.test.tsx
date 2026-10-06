@@ -11,6 +11,10 @@ vi.mock('./store/useMailStore', () => ({
     fetchMessages: vi.fn(),
     selectedConversationId: null,
     selectConversation: vi.fn(),
+    isComposing: false,
+    setComposing: vi.fn(),
+    searchQuery: '',
+    setSearchQuery: vi.fn(),
   })),
 }));
 

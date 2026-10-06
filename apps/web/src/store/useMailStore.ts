@@ -31,8 +31,10 @@ interface MailState {
   isComposing: boolean;
   composeDefaults: ComposeDefaults | null;
   drafts: Record<string, Draft>;
+  searchQuery: string;
   fetchMessages: () => Promise<void>;
   selectConversation: (id: string | null) => void;
+  setSearchQuery: (query: string) => void;
   setComposing: (isComposing: boolean, defaults?: ComposeDefaults) => void;
   saveDraft: (key: string, draft: Draft) => void;
   clearDraft: (key: string) => void;
@@ -72,8 +74,10 @@ export const useMailStore = create<MailState>((set) => ({
   isComposing: false,
   composeDefaults: null,
   drafts: {},
+  searchQuery: '',
   selectedConversationId: null,
   selectConversation: (id) => set({ selectedConversationId: id }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
   setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
   saveDraft: (key, draft) => set((state) => ({ drafts: { ...state.drafts, [key]: draft } })),
   clearDraft: (key) => set((state) => {

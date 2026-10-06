@@ -4,7 +4,7 @@ import { Composer } from './features/compose/Composer';
 import { useMailStore } from './store/useMailStore';
 
 export function App() {
-  const { isComposing, setComposing } = useMailStore();
+  const { isComposing, setComposing, searchQuery, setSearchQuery } = useMailStore();
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -30,8 +30,16 @@ export function App() {
       
       {/* List Pane */}
       <section style={{ width: '400px', borderRight: 'var(--border-default)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <header style={{ padding: 'var(--space-4)', borderBottom: 'var(--border-default)' }}>
+        <header style={{ padding: 'var(--space-4)', borderBottom: 'var(--border-default)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 500 }}>Attention</h2>
+          <input 
+            data-testid="search-input"
+            type="text" 
+            placeholder="Search Mail..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)', outline: 'none', backgroundColor: 'var(--bg-primary)' }}
+          />
         </header>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <MessageList />

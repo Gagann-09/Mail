@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MessageList } from './MessageList';
 import * as storeModule from '../../store/useMailStore';
 import { LocalConversation } from '../../store/useMailStore';
@@ -16,6 +16,10 @@ describe('MessageList', () => {
     vi.resetAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders loading state', () => {
     vi.mocked(storeModule.useMailStore).mockReturnValue({
       messages: [],
@@ -25,6 +29,7 @@ describe('MessageList', () => {
       fetchMessages: mockFetchMessages,
       selectedConversationId: null,
       selectConversation: vi.fn(),
+      searchQuery: '',
     });
 
     render(<MessageList />);
@@ -41,6 +46,7 @@ describe('MessageList', () => {
       fetchMessages: mockFetchMessages,
       selectedConversationId: null,
       selectConversation: vi.fn(),
+      searchQuery: '',
     });
 
     render(<MessageList />);
@@ -56,6 +62,7 @@ describe('MessageList', () => {
       fetchMessages: mockFetchMessages,
       selectedConversationId: null,
       selectConversation: vi.fn(),
+      searchQuery: '',
     });
 
     render(<MessageList />);
@@ -90,6 +97,7 @@ describe('MessageList', () => {
       fetchMessages: mockFetchMessages,
       selectedConversationId: null,
       selectConversation: vi.fn(),
+      searchQuery: '',
     });
 
     render(<MessageList />);
@@ -98,5 +106,58 @@ describe('MessageList', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('Hello World')).toBeInTheDocument();
     expect(screen.getByText('This is a test snippet')).toBeInTheDocument();
+  });
+
+  it('filters list of conversations by search query', () => {
+    const mockConvos: LocalConversation[] = [
+      {
+        id: 't-1',
+        subject: 'Hello World',
+        updatedAt: new Date('2023-01-01T12:00:00Z'),
+        messages: [{
+          id: '1',
+          providerId: 'p-1',
+          threadId: 't-1',
+          from: { name: 'Alice', email: 'alice@test.com' },
+          to: [{ email: 'me@test.com' }],
+          subject: 'Hello World',
+          snippet: 'This is a test snippet',
+          date: new Date('2023-01-01T12:00:00Z'),
+          hasAttachments: false,
+        }]
+      },
+      {
+        id: 't-2',
+        subject: 'Different Topic',
+        updatedAt: new Date('2023-01-02T12:00:00Z'),
+        messages: [{
+          id: '2',
+          providerId: 'p-2',
+          threadId: 't-2',
+          from: { name: 'Bob', email: 'bob@test.com' },
+          to: [{ email: 'me@test.com' }],
+          subject: 'Different Topic',
+          snippet: 'Something else entirely',
+          date: new Date('2023-01-02T12:00:00Z'),
+          hasAttachments: false,
+        }]
+      }
+    ];
+
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: mockConvos,
+      loading: false,
+      error: null,
+      fetchMessages: mockFetchMessages,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
+      searchQuery: 'Topic',
+    });
+
+    render(<MessageList />);
+    
+    expect(screen.queryByText('Hello World')).not.toBeInTheDocument();
+    expect(screen.getByText('Different Topic')).toBeInTheDocument();
   });
 });
