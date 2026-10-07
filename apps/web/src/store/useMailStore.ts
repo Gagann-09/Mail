@@ -22,9 +22,22 @@ export interface Draft {
   threadId?: string;
 }
 
+export interface StoreAttachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  size: number;
+  url?: string;
+  threadId: string;
+  messageId: string;
+  date: Date;
+  from: any; // Contact
+}
+
 interface MailState {
   messages: LocalMessage[];
   conversations: LocalConversation[];
+  attachments: StoreAttachment[];
   loading: boolean;
   error: string | null;
   selectedConversationId: string | null;
@@ -46,12 +59,38 @@ interface MailState {
   toggleLater: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
-  currentView: 'attention' | 'waiting' | 'later' | 'all';
-  setCurrentView: (view: 'attention' | 'waiting' | 'later' | 'all') => void;
+  currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments';
+  setCurrentView: (view: 'attention' | 'waiting' | 'later' | 'all' | 'attachments') => void;
   clearToast: () => void;
 }
 
-function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all', searchQuery: string = ''): LocalConversation[] {
+function computeAttachments(messages: LocalMessage[], searchQuery: string = ''): StoreAttachment[] {
+  let atts: StoreAttachment[] = [];
+  messages.forEach(m => {
+    if (m.labels?.includes('TRASH') || m.labels?.includes('SPAM')) return;
+    if (m.hasAttachments && m.attachments) {
+      m.attachments.forEach(a => {
+        atts.push({
+          ...a,
+          threadId: m.threadId,
+          messageId: m.id,
+          date: m.date,
+          from: m.from
+        });
+      });
+    }
+  });
+
+  if (searchQuery.trim().length > 0) {
+    const q = searchQuery.toLowerCase();
+    atts = atts.filter(a => a.filename.toLowerCase().includes(q));
+  }
+
+  atts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return atts;
+}
+
+function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments', searchQuery: string = ''): LocalConversation[] {
   const map = new Map<string, LocalMessage[]>();
   // Pre-filter out trash and spam for all standard views
   const validMessages = messages.filter(m => !m.labels?.includes('TRASH') && !m.labels?.includes('SPAM'));
@@ -153,11 +192,13 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
   });
 
   const newConversations = computeConversations(newMessages, state.currentView, state.searchQuery);
+  const newAttachments = computeAttachments(newMessages, state.searchQuery);
   const stillInView = newConversations.some(c => c.id === threadId);
 
   useMailStore.setState({
     messages: newMessages,
     conversations: newConversations,
+    attachments: newAttachments,
     selectedConversationId: stillInView ? state.selectedConversationId : null,
     toastMessage: toastText
   });
@@ -186,9 +227,11 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
       if (commitPendingAction === commitApi) {
         commitPendingAction = null;
         const revertedConversations = computeConversations(originalMessages, state.currentView, state.searchQuery);
+        const revertedAttachments = computeAttachments(originalMessages, state.searchQuery);
         useMailStore.setState({ 
           messages: originalMessages,
           conversations: revertedConversations, 
+          attachments: revertedAttachments,
           selectedConversationId: originalSelectedId 
         });
         useMailStore.getState().clearToast();
@@ -200,6 +243,7 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
 export const useMailStore = create<MailState>((set) => ({
   messages: [],
   conversations: [],
+  attachments: [],
   loading: false,
   error: null,
   isComposing: false,
@@ -213,13 +257,15 @@ export const useMailStore = create<MailState>((set) => ({
   setCurrentView: (view) => set((state) => ({ 
     currentView: view, 
     conversations: computeConversations(state.messages, view, state.searchQuery),
+    attachments: computeAttachments(state.messages, state.searchQuery),
     selectedConversationId: null // Reset selection on view change
   })),
   clearToast: () => set({ toastMessage: null, undoAction: null }),
   selectConversation: (id) => set({ selectedConversationId: id }),
   setSearchQuery: (query) => set((state) => ({ 
     searchQuery: query,
-    conversations: computeConversations(state.messages, state.currentView, query)
+    conversations: computeConversations(state.messages, state.currentView, query),
+    attachments: computeAttachments(state.messages, query)
   })),
   setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
   saveDraft: (key, draft) => set((state) => ({ drafts: { ...state.drafts, [key]: draft } })),
@@ -278,17 +324,20 @@ export const useMailStore = create<MailState>((set) => ({
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
       const state = useMailStore.getState();
       const conversations = computeConversations(allMessages, state.currentView, state.searchQuery);
-      set({ messages: allMessages, conversations, loading: false });
+      const attachments = computeAttachments(allMessages, state.searchQuery);
+      set({ messages: allMessages, conversations, attachments, loading: false });
     } catch (err) {
       console.error(err);
       // Fallback to local DB if offline or error
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
       const state = useMailStore.getState();
       const conversations = computeConversations(allMessages, state.currentView, state.searchQuery);
+      const attachments = computeAttachments(allMessages, state.searchQuery);
       set({ 
         messages: allMessages, 
         conversations,
-        loading: false, 
+        attachments,
+        loading: false,  
         error: allMessages.length === 0 ? 'Failed to load messages' : null 
       });
     }

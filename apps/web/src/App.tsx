@@ -1,4 +1,5 @@
 import { MessageList } from './features/reading/MessageList';
+import { AttachmentList } from './features/reading/AttachmentList';
 import { MessageDetail } from './features/reading/MessageDetail';
 import { Composer } from './features/compose/Composer';
 import { useMailStore } from './store/useMailStore';
@@ -53,13 +54,21 @@ export function App() {
               All Mail
             </button>
           </li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('attachments')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: currentView === 'attachments' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'attachments' ? 600 : 500, color: currentView === 'attachments' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Attachments
+            </button>
+          </li>
         </ul>
       </nav>
       
       {/* List Pane */}
       <section className="list-pane">
         <header style={{ padding: 'var(--space-4)', borderBottom: 'var(--border-default)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 500 }}>Attention</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 500, textTransform: 'capitalize' }}>{currentView === 'all' ? 'All Mail' : currentView}</h2>
           <input 
             data-testid="search-input"
             type="text" 
@@ -71,7 +80,7 @@ export function App() {
           />
         </header>
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          <MessageList />
+          {currentView === 'attachments' ? <AttachmentList /> : <MessageList />}
         </div>
       </section>
 
