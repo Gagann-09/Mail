@@ -48,22 +48,7 @@ export function Composer() {
   return (
     <div 
       data-testid="composer-modal"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        right: '50px',
-        width: '500px',
-        height: '600px',
-        backgroundColor: 'var(--bg-primary)',
-        border: 'var(--border-default)',
-        borderBottom: 'none',
-        borderTopLeftRadius: 'var(--radius-lg)',
-        borderTopRightRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-lg)',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 1000
-      }}
+      className="composer-modal"
     >
       {/* Header */}
       <header 

@@ -4,12 +4,12 @@ import { Composer } from './features/compose/Composer';
 import { useMailStore } from './store/useMailStore';
 
 export function App() {
-  const { isComposing, setComposing, searchQuery, setSearchQuery, toastMessage, undoAction } = useMailStore();
+  const { isComposing, setComposing, searchQuery, setSearchQuery, toastMessage, undoAction, selectedConversationId } = useMailStore();
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-container" data-view={selectedConversationId ? 'detail' : 'list'}>
       {/* Sidebar Placeholder */}
-      <nav style={{ width: '250px', borderRight: 'var(--border-default)', backgroundColor: 'var(--bg-secondary)', padding: 'var(--space-4)', flexShrink: 0 }}>
+      <nav className="nav-pane">
         <h1 style={{ fontSize: '24px', fontWeight: 500, marginBottom: 'var(--space-8)' }}>Mail</h1>
         
         <button 
@@ -29,7 +29,7 @@ export function App() {
       </nav>
       
       {/* List Pane */}
-      <section style={{ width: '400px', borderRight: 'var(--border-default)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <section className="list-pane">
         <header style={{ padding: 'var(--space-4)', borderBottom: 'var(--border-default)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 500 }}>Attention</h2>
           <input 
@@ -47,7 +47,7 @@ export function App() {
       </section>
 
       {/* Detail Pane */}
-      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto', backgroundColor: 'var(--bg-primary)' }}>
+      <main className="detail-pane">
         <MessageDetail />
       </main>
 

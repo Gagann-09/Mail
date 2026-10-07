@@ -25,10 +25,20 @@ export function MessageDetail() {
 
   return (
     <article data-testid="conversation-detail" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-high)', margin: 0 }}>
-          {conversation.subject}
-        </h1>
+      <header style={{ paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button 
+            className="mobile-back-btn" 
+            data-testid="mobile-back-btn"
+            onClick={() => useMailStore.getState().selectConversation(null)}
+            aria-label="Back to messages"
+          >
+            ←
+          </button>
+          <h1 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-high)', margin: 0 }}>
+            {conversation.subject}
+          </h1>
+        </div>
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           <button
             data-testid="archive-btn"
