@@ -95,4 +95,28 @@ describe('Attention States (useMailStore)', () => {
     expect(currentView).toBe('all');
     expect(conversations.length).toBe(4);
   });
+
+  it('filters by search query (subject)', () => {
+    useMailStore.getState().setCurrentView('all');
+    useMailStore.getState().setSearchQuery('Waiting');
+    const { conversations } = useMailStore.getState();
+    expect(conversations.length).toBe(1);
+    expect(conversations[0].id).toBe('t2');
+  });
+
+  it('filters by search query (sender email)', () => {
+    useMailStore.getState().setCurrentView('all');
+    useMailStore.getState().setSearchQuery('a@example.com');
+    const { conversations } = useMailStore.getState();
+    expect(conversations.length).toBe(1);
+    expect(conversations[0].id).toBe('t1');
+  });
+
+  it('filters by search query ignoring case', () => {
+    useMailStore.getState().setCurrentView('all');
+    useMailStore.getState().setSearchQuery('ARCHIVED');
+    const { conversations } = useMailStore.getState();
+    expect(conversations.length).toBe(1);
+    expect(conversations[0].id).toBe('t4');
+  });
 });

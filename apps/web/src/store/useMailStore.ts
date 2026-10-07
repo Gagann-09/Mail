@@ -51,7 +51,7 @@ interface MailState {
   clearToast: () => void;
 }
 
-function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all'): LocalConversation[] {
+function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all', searchQuery: string = ''): LocalConversation[] {
   const map = new Map<string, LocalMessage[]>();
   // Pre-filter out trash and spam for all standard views
   const validMessages = messages.filter(m => !m.labels?.includes('TRASH') && !m.labels?.includes('SPAM'));
@@ -86,6 +86,21 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
   }
   
   filteredConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  
+  // Apply search query filter if present
+  if (searchQuery.trim().length > 0) {
+    const q = searchQuery.toLowerCase();
+    filteredConvos = filteredConvos.filter(c => {
+      if (c.subject.toLowerCase().includes(q)) return true;
+      return c.messages.some(m => 
+        (m.snippet && m.snippet.toLowerCase().includes(q)) ||
+        (m.bodyHtml && m.bodyHtml.toLowerCase().includes(q)) ||
+        (m.from.name && m.from.name.toLowerCase().includes(q)) ||
+        (m.from.email.toLowerCase().includes(q))
+      );
+    });
+  }
+
   return filteredConvos;
 }
 
@@ -137,7 +152,7 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
     return { ...m, labels: newLabels };
   });
 
-  const newConversations = computeConversations(newMessages, state.currentView);
+  const newConversations = computeConversations(newMessages, state.currentView, state.searchQuery);
   const stillInView = newConversations.some(c => c.id === threadId);
 
   useMailStore.setState({
@@ -170,7 +185,7 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
       if (pendingActionTimeout) clearTimeout(pendingActionTimeout);
       if (commitPendingAction === commitApi) {
         commitPendingAction = null;
-        const revertedConversations = computeConversations(originalMessages, state.currentView);
+        const revertedConversations = computeConversations(originalMessages, state.currentView, state.searchQuery);
         useMailStore.setState({ 
           messages: originalMessages,
           conversations: revertedConversations, 
@@ -197,12 +212,15 @@ export const useMailStore = create<MailState>((set) => ({
   currentView: 'attention',
   setCurrentView: (view) => set((state) => ({ 
     currentView: view, 
-    conversations: computeConversations(state.messages, view),
+    conversations: computeConversations(state.messages, view, state.searchQuery),
     selectedConversationId: null // Reset selection on view change
   })),
   clearToast: () => set({ toastMessage: null, undoAction: null }),
   selectConversation: (id) => set({ selectedConversationId: id }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
+  setSearchQuery: (query) => set((state) => ({ 
+    searchQuery: query,
+    conversations: computeConversations(state.messages, state.currentView, query)
+  })),
   setComposing: (isComposing, defaults = null) => set({ isComposing, composeDefaults: defaults }),
   saveDraft: (key, draft) => set((state) => ({ drafts: { ...state.drafts, [key]: draft } })),
   clearDraft: (key) => set((state) => {
@@ -259,14 +277,14 @@ export const useMailStore = create<MailState>((set) => ({
       // Update React State
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
       const state = useMailStore.getState();
-      const conversations = computeConversations(allMessages, state.currentView);
+      const conversations = computeConversations(allMessages, state.currentView, state.searchQuery);
       set({ messages: allMessages, conversations, loading: false });
     } catch (err) {
       console.error(err);
       // Fallback to local DB if offline or error
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
       const state = useMailStore.getState();
-      const conversations = computeConversations(allMessages, state.currentView);
+      const conversations = computeConversations(allMessages, state.currentView, state.searchQuery);
       set({ 
         messages: allMessages, 
         conversations,
