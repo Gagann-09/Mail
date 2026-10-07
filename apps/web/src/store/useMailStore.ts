@@ -48,15 +48,16 @@ interface MailState {
   fetchMessages: () => Promise<void>;
   selectConversation: (id: string | null) => void;
   setSearchQuery: (query: string) => void;
-  setComposing: (isComposing: boolean, defaults?: ComposeDefaults) => void;
+  setComposing: (isComposing: boolean, defaults?: ComposeDefaults | null) => void;
   saveDraft: (key: string, draft: Draft) => void;
   clearDraft: (key: string) => void;
-  sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string) => Promise<void>;
-  archiveConversation: (threadId: string) => Promise<void>;
-  trashConversation: (threadId: string) => Promise<void>;
+  sendMessage: (to: string, subject: string, body: string, isWaiting: boolean, threadId?: string, isScheduled?: boolean) => Promise<void>;
+  archiveConversation: (threadId: string) => void;
+  trashConversation: (threadId: string) => void;
   spamConversation: (threadId: string) => void;
   toggleWaiting: (threadId: string) => void;
   toggleLater: (threadId: string) => void;
+  toggleSnooze: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
   currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments';
@@ -117,7 +118,7 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
   // Filter based on view
   let filteredConvos = convos;
   if (currentView === 'attention') {
-    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX') && !m.labels?.includes('WAITING') && !m.labels?.includes('LATER')));
+    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX') && !m.labels?.includes('WAITING') && !m.labels?.includes('LATER') && !m.labels?.includes('SNOOZED')));
   } else if (currentView === 'waiting') {
     filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('WAITING')));
   } else if (currentView === 'later') {
@@ -146,7 +147,7 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
 let pendingActionTimeout: any = null;
 let commitPendingAction: (() => void) | null = null;
 
-type MutateAction = 'archive' | 'trash' | 'spam' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later';
+type MutateAction = 'archive' | 'trash' | 'spam' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later' | 'snooze' | 'remove_snooze';
 
 function handleOptimisticMutate(threadId: string, action: MutateAction, toastText: string) {
   const state = useMailStore.getState();
@@ -185,6 +186,11 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
       if (!newLabels.includes('LATER')) newLabels.push('LATER');
     } else if (action === 'remove_later') {
       const wIdx = newLabels.indexOf('LATER');
+      if (wIdx > -1) newLabels.splice(wIdx, 1);
+    } else if (action === 'snooze') {
+      if (!newLabels.includes('SNOOZED')) newLabels.push('SNOOZED');
+    } else if (action === 'remove_snooze') {
+      const wIdx = newLabels.indexOf('SNOOZED');
       if (wIdx > -1) newLabels.splice(wIdx, 1);
     }
     
@@ -274,12 +280,12 @@ export const useMailStore = create<MailState>((set) => ({
     delete newDrafts[key];
     return { drafts: newDrafts };
   }),
-  sendMessage: async (to, subject, body, isWaiting, threadId) => {
+  sendMessage: async (to, subject, body, isWaiting, threadId, isScheduled = false) => {
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, body, isWaiting, threadId })
+        body: JSON.stringify({ to, subject, body, isWaiting, threadId, isScheduled })
       });
       if (!response.ok) {
         throw new Error('Failed to send message');
@@ -306,6 +312,12 @@ export const useMailStore = create<MailState>((set) => ({
     if (!convo) return;
     const isLater = convo.messages.some(m => m.labels?.includes('LATER'));
     handleOptimisticMutate(threadId, isLater ? 'remove_later' : 'later', isLater ? 'Removed from later' : 'Marked for later');
+  },
+  toggleSnooze: (threadId) => {
+    const convo = useMailStore.getState().conversations.find(c => c.id === threadId);
+    if (!convo) return;
+    const isSnoozed = convo.messages.some(m => m.labels?.includes('SNOOZED'));
+    handleOptimisticMutate(threadId, isSnoozed ? 'remove_snooze' : 'snooze', isSnoozed ? 'Unsnoozed' : 'Snoozed');
   },
   fetchMessages: async () => {
     set({ loading: true, error: null });

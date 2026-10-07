@@ -303,7 +303,8 @@ describe('MessageDetail', () => {
       trashConversation: vi.fn(),
       spamConversation: vi.fn(),
       toggleWaiting: vi.fn(),
-      toggleLater: mockToggleLater
+      toggleLater: mockToggleLater,
+      toggleSnooze: vi.fn()
     });
     
     storeModule.useMailStore.getState = vi.fn().mockReturnValue({ toggleLater: mockToggleLater });
@@ -312,5 +313,40 @@ describe('MessageDetail', () => {
     const laterBtn = screen.getByTestId('later-btn');
     laterBtn.click();
     expect(mockToggleLater).toHaveBeenCalledWith('t-1');
+  });
+
+  it('calls toggleSnooze when Snooze button is clicked', () => {
+    const mockToggleSnooze = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn(),
+      trashConversation: vi.fn(),
+      spamConversation: vi.fn(),
+      toggleWaiting: vi.fn(),
+      toggleLater: vi.fn(),
+      toggleSnooze: mockToggleSnooze
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ toggleSnooze: mockToggleSnooze });
+
+    render(<MessageDetail />);
+    const snoozeBtn = screen.getByTestId('snooze-btn');
+    snoozeBtn.click();
+    expect(mockToggleSnooze).toHaveBeenCalledWith('t-1');
   });
 });

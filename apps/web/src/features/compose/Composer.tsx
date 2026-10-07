@@ -118,22 +118,49 @@ export function Composer() {
           Track as Waiting
         </label>
         
-        <button 
-          data-testid="composer-send"
-          onClick={handleSend}
-          disabled={isSending}
-          style={{ 
-            backgroundColor: 'var(--text-high)', 
-            color: 'var(--bg-primary)', 
-            border: 'none', 
-            padding: 'var(--space-2) var(--space-6)',
-            borderRadius: 'var(--radius-md)',
-            cursor: isSending ? 'not-allowed' : 'pointer',
-            fontWeight: 600
-          }}
-        >
-          {isSending ? 'Sending...' : 'Send'}
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <button 
+            data-testid="composer-schedule"
+            onClick={() => {
+              // Mock scheduling for tomorrow
+              sendMessage(to, subject, body, isWaiting, composeDefaults?.threadId, true)
+                .then(() => {
+                  clearDraft(draftKey);
+                  setComposing(false);
+                })
+                .catch(() => setError('Failed to schedule send. Please try again.'));
+            }}
+            disabled={isSending}
+            style={{ 
+              backgroundColor: 'var(--bg-secondary)', 
+              color: 'var(--text-high)', 
+              border: 'var(--border-default)', 
+              padding: 'var(--space-2) var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              cursor: isSending ? 'not-allowed' : 'pointer',
+              fontWeight: 500
+            }}
+          >
+            Schedule Send
+          </button>
+          
+          <button 
+            data-testid="composer-send"
+            onClick={handleSend}
+            disabled={isSending}
+            style={{ 
+              backgroundColor: 'var(--text-high)', 
+              color: 'var(--bg-primary)', 
+              border: 'none', 
+              padding: 'var(--space-2) var(--space-6)',
+              borderRadius: 'var(--radius-md)',
+              cursor: isSending ? 'not-allowed' : 'pointer',
+              fontWeight: 600
+            }}
+          >
+            {isSending ? 'Sending...' : 'Send'}
+          </button>
+        </div>
       </footer>
     </div>
   );

@@ -109,7 +109,18 @@ export class DemoProvider implements IProviderAdapter {
     };
   }
 
-  async sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string }): Promise<void> {
+  async sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string; isWaiting?: boolean; isScheduled?: boolean }): Promise<void> {
+    const labels = ['SENT'];
+    if (!payload.isScheduled) {
+      labels.push('INBOX');
+    } else {
+      labels.push('SCHEDULED');
+    }
+
+    if (payload.isWaiting) {
+      labels.push('WAITING');
+    }
+
     const newMsg: Message = {
       id: `msg-sent-${Date.now()}`,
       providerId: `demo-prov-${Date.now()}`,
@@ -121,14 +132,14 @@ export class DemoProvider implements IProviderAdapter {
       subject: payload.subject,
       snippet: payload.body.substring(0, 100),
       date: new Date(),
-      labels: ['INBOX', 'SENT'],
+      labels: labels,
       hasAttachments: false,
     };
     this.inMemoryMessages.push(newMsg);
     this.historyCounter++;
   }
 
-  async mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later'): Promise<void> {
+  async mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later' | 'snooze' | 'remove_snooze'): Promise<void> {
     const msgIndex = this.inMemoryMessages.findIndex(m => m.providerId === providerId);
     if (msgIndex === -1) {
       throw new Error('Message not found on provider');
@@ -164,6 +175,12 @@ export class DemoProvider implements IProviderAdapter {
       }
     } else if (action === 'remove_later') {
       msg.labels = msg.labels.filter(l => l !== 'LATER');
+    } else if (action === 'snooze') {
+      if (!msg.labels.includes('SNOOZED')) {
+        msg.labels.push('SNOOZED');
+      }
+    } else if (action === 'remove_snooze') {
+      msg.labels = msg.labels.filter(l => l !== 'SNOOZED');
     }
     
     this.historyCounter++;

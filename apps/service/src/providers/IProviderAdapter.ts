@@ -30,11 +30,11 @@ export interface IProviderAdapter {
   /**
    * Sends a new email through the provider.
    */
-  sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string }): Promise<void>;
+  sendMessage(payload: { to: string[]; subject: string; body: string; threadId?: string; isWaiting?: boolean; isScheduled?: boolean }): Promise<void>;
 
   /**
    * Mutates a message's state on the provider side (e.g., mark read, archive).
    * Note: The adapter must map our abstract 'action' to the provider's specific label/folder mechanisms.
    */
-  mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later'): Promise<void>;
+  mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later' | 'snooze' | 'remove_snooze'): Promise<void>;
 }

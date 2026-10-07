@@ -117,4 +117,48 @@ describe('Composer', () => {
     expect(screen.getByTestId('composer-subject')).toHaveValue('Draft Sub');
     expect(screen.getByTestId('composer-body')).toHaveValue('Draft body');
   });
+
+  it('schedules message when Schedule Send is clicked', async () => {
+    const mockSendMessage = vi.fn().mockResolvedValue(undefined);
+    const mockClearDraft = vi.fn();
+    const mockSetComposing = vi.fn();
+
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      isComposing: true,
+      composeDefaults: null,
+      setComposing: mockSetComposing,
+      sendMessage: mockSendMessage,
+      messages: [],
+      conversations: [],
+      drafts: {},
+      saveDraft: vi.fn(),
+      clearDraft: mockClearDraft,
+      loading: false,
+      error: null,
+      selectedConversationId: null,
+      selectConversation: vi.fn(),
+      fetchMessages: vi.fn(),
+    });
+
+    render(<Composer />);
+    fireEvent.change(screen.getByTestId('composer-to'), { target: { value: 'alice@test.com' } });
+    fireEvent.change(screen.getByTestId('composer-subject'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByTestId('composer-body'), { target: { value: 'Hello' } });
+    
+    fireEvent.click(screen.getByTestId('composer-schedule'));
+    
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      'alice@test.com',
+      'Test',
+      'Hello',
+      false,
+      undefined,
+      true
+    );
+    
+    await vi.waitFor(() => {
+      expect(mockClearDraft).toHaveBeenCalledWith('new');
+      expect(mockSetComposing).toHaveBeenCalledWith(false);
+    });
+  });
 });
