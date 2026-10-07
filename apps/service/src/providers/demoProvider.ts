@@ -92,6 +92,13 @@ export class DemoProvider implements IProviderAdapter {
         labels: ['INBOX'],
         hasAttachments: false,
         category: 'newsletter',
+        activity: [
+          {
+            description: 'Categorized as Newsletter based on sender.',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            actionTaken: 'Removed from Attention Inbox'
+          }
+        ]
       },
       {
         id: 'msg-4',
@@ -108,6 +115,13 @@ export class DemoProvider implements IProviderAdapter {
         labels: ['INBOX'],
         hasAttachments: false,
         category: 'notification',
+        activity: [
+          {
+            description: 'Categorized as Notification based on sender.',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+            actionTaken: 'Removed from Attention Inbox'
+          }
+        ]
       }
     ];
   }

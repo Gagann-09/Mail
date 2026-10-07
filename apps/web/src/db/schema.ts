@@ -14,6 +14,13 @@ export interface LocalMessage {
   hasAttachments: boolean;
   attachments?: Attachment[];
   category?: 'personal' | 'newsletter' | 'notification' | 'transactional';
+  activity?: ActivityEvent[];
+}
+
+export interface ActivityEvent {
+  description: string;
+  timestamp: Date;
+  actionTaken: string;
 }
 
 export interface Attachment {

@@ -86,6 +86,19 @@ export function MessageDetail() {
         </div>
       </header>
       
+      {conversation.messages.some(m => m.activity && m.activity.length > 0) && (
+        <div style={{ padding: 'var(--space-3)', marginBottom: 'var(--space-4)', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', fontSize: '14px' }}>
+          <strong style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--text-high)' }}>🤖 Automated Action Log</strong>
+          <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', color: 'var(--text-medium)' }}>
+            {conversation.messages.flatMap(m => m.activity || []).map((act, idx) => (
+              <li key={idx} style={{ marginBottom: 'var(--space-1)' }}>
+                {act.description} <span style={{ fontWeight: 500, color: 'var(--text-high)' }}>({act.actionTaken})</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
         {conversation.messages.map((message, index) => (
           <div key={message.id} data-testid={`message-${message.id}`} style={{ borderBottom: index < conversation.messages.length - 1 ? 'var(--border-default)' : 'none', paddingBottom: 'var(--space-4)' }}>

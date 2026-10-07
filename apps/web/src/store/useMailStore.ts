@@ -91,7 +91,7 @@ function computeAttachments(messages: LocalMessage[], searchQuery: string = ''):
   return atts;
 }
 
-function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments', searchQuery: string = ''): LocalConversation[] {
+function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments' | 'newsletters' | 'notifications', searchQuery: string = ''): LocalConversation[] {
   const map = new Map<string, LocalMessage[]>();
   // Pre-filter out trash and spam for all standard views
   const validMessages = messages.filter(m => !m.labels?.includes('TRASH') && !m.labels?.includes('SPAM'));
