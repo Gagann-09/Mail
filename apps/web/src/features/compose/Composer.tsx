@@ -67,6 +67,7 @@ export function Composer() {
         <button 
           data-testid="close-composer"
           onClick={() => setComposing(false)}
+          aria-label="Close composer"
           style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: 'var(--text-medium)' }}
         >
           ×
@@ -81,6 +82,7 @@ export function Composer() {
           data-testid="composer-to"
           type="text" 
           placeholder="To" 
+          aria-label="Recipient"
           value={to}
           onChange={(e) => setTo(e.target.value)}
           style={{ border: 'none', borderBottom: 'var(--border-default)', padding: 'var(--space-2) 0', outline: 'none' }}
@@ -89,6 +91,7 @@ export function Composer() {
           data-testid="composer-subject"
           type="text" 
           placeholder="Subject" 
+          aria-label="Subject"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           style={{ border: 'none', borderBottom: 'var(--border-default)', padding: 'var(--space-2) 0', outline: 'none', fontWeight: 600 }}
@@ -96,6 +99,7 @@ export function Composer() {
         <textarea 
           data-testid="composer-body"
           placeholder="Write your message..."
+          aria-label="Message body"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           style={{ flex: 1, border: 'none', padding: 'var(--space-2) 0', outline: 'none', resize: 'none', marginTop: 'var(--space-2)' }}

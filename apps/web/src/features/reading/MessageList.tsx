@@ -43,21 +43,26 @@ export function MessageList() {
         const participantNames = Array.from(new Set(convo.messages.map(m => m.from.name || m.from.email))).join(', ');
         
         return (
-        <li 
-          key={convo.id} 
-          onClick={() => selectConversation(convo.id)}
-          data-testid={`convo-${convo.id}`}
-          style={{ 
-            padding: 'var(--space-4)', 
-            borderBottom: 'var(--border-default)',
-            cursor: 'pointer',
-            backgroundColor: isSelected ? 'var(--bg-secondary)' : 'transparent',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-1)'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <li key={convo.id}>
+          <button 
+            onClick={() => selectConversation(convo.id)}
+            data-testid={`convo-${convo.id}`}
+            aria-label={`Conversation: ${convo.subject}, ${convo.messages.length} messages, last updated ${new Date(convo.updatedAt).toLocaleDateString()}`}
+            aria-selected={isSelected}
+            style={{ 
+              width: '100%',
+              textAlign: 'left',
+              border: 'none',
+              padding: 'var(--space-4)', 
+              borderBottom: 'var(--border-default)',
+              cursor: 'pointer',
+              backgroundColor: isSelected ? 'var(--bg-secondary)' : 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-1)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <span style={{ fontWeight: 600 }}>
               {participantNames} {convo.messages.length > 1 && <span style={{ color: 'var(--text-medium)', fontWeight: 'normal' }}>({convo.messages.length})</span>}
             </span>
@@ -66,9 +71,10 @@ export function MessageList() {
             </span>
           </div>
           <div style={{ fontWeight: 500, color: 'var(--text-high)' }}>{convo.subject}</div>
-          <div style={{ fontSize: '14px', color: 'var(--text-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {lastMsg.snippet}
-          </div>
+            <div style={{ fontSize: '14px', color: 'var(--text-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {lastMsg.snippet}
+            </div>
+          </button>
         </li>
         );
       })}

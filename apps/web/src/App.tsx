@@ -21,10 +21,10 @@ export function App() {
         </button>
 
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <li style={{ padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: '3px solid var(--text-high)' }}>Attention</li>
-          <li style={{ padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Waiting</li>
-          <li style={{ padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Later</li>
-          <li style={{ padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>All Mail</li>
+          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: '3px solid var(--text-high)', fontWeight: 500 }}>Attention</button></li>
+          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Waiting</button></li>
+          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Later</button></li>
+          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>All Mail</button></li>
         </ul>
       </nav>
       
@@ -38,6 +38,7 @@ export function App() {
             placeholder="Search Mail..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search Mail"
             style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)', outline: 'none', backgroundColor: 'var(--bg-primary)' }}
           />
         </header>
