@@ -1,4 +1,5 @@
 import { useMailStore } from '../../store/useMailStore';
+import DOMPurify from 'dompurify';
 
 export function MessageDetail() {
   const { conversations, selectedConversationId } = useMailStore();
@@ -89,7 +90,7 @@ export function MessageDetail() {
             <div 
               style={{ color: 'var(--text-high)', fontSize: '15px', lineHeight: 1.6 }}
               data-testid={`message-body-${message.id}`}
-              dangerouslySetInnerHTML={{ __html: message.bodyHtml || message.snippet }} 
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.bodyHtml || message.snippet || '') }} 
             />
           </div>
         ))}
