@@ -13,6 +13,7 @@ export interface LocalMessage {
   labels?: string[];
   hasAttachments: boolean;
   attachments?: Attachment[];
+  category?: 'personal' | 'newsletter' | 'notification' | 'transactional';
 }
 
 export interface Attachment {

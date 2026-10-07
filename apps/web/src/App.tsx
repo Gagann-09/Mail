@@ -63,6 +63,28 @@ export function App() {
             </button>
           </li>
         </ul>
+
+        <div style={{ padding: 'var(--space-4)', paddingBottom: 'var(--space-2)', fontSize: '12px', fontWeight: 600, color: 'var(--text-medium)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Smart Views
+        </div>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          <li>
+            <button 
+              onClick={() => setCurrentView('newsletters')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-4)', cursor: 'pointer', borderLeft: currentView === 'newsletters' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'newsletters' ? 600 : 500, color: currentView === 'newsletters' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Newsletters
+            </button>
+          </li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('notifications')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-4)', cursor: 'pointer', borderLeft: currentView === 'notifications' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'notifications' ? 600 : 500, color: currentView === 'notifications' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Notifications
+            </button>
+          </li>
+        </ul>
       </nav>
       
       {/* List Pane */}

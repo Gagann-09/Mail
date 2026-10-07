@@ -25,7 +25,7 @@ describe('Authentication Boundary and Provider Abstraction', () => {
     const provider: IProviderAdapter = new DemoProvider();
     const result = await provider.syncMailbox();
     
-    expect(result.messages.length).toBe(3);
+    expect(result.messages.length).toBe(5);
     const msg = result.messages[0];
     
     // Verify provider specific concepts don't leak (e.g., Gmail's 'labelIds' should not exist in the domain model)
@@ -40,7 +40,7 @@ describe('Authentication Boundary and Provider Abstraction', () => {
     
     // Perform a new sync to verify it was updated
     const newSync = await provider.syncMailbox();
-    expect(newSync.messages.length).toBe(3);
+    expect(newSync.messages.length).toBe(5);
     const trashedMsg = newSync.messages.find(m => m.providerId === 'demo-prov-1');
     expect(trashedMsg?.labels).toContain('TRASH');
     expect(trashedMsg?.labels).not.toContain('INBOX');
@@ -48,8 +48,8 @@ describe('Authentication Boundary and Provider Abstraction', () => {
     // Send a message
     await provider.sendMessage({ to: ['new@example.com'], subject: 'Hello', body: 'Test' });
     const finalSync = await provider.syncMailbox();
-    expect(finalSync.messages.length).toBe(4);
-    expect(finalSync.messages[3].subject).toBe('Hello');
+    expect(finalSync.messages.length).toBe(6);
+    expect(finalSync.messages[5].subject).toBe('Hello');
   });
 
   it('fails authentication at the boundary on invalid code', async () => {

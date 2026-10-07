@@ -60,8 +60,8 @@ interface MailState {
   toggleSnooze: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
-  currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments';
-  setCurrentView: (view: 'attention' | 'waiting' | 'later' | 'all' | 'attachments') => void;
+  currentView: 'attention' | 'waiting' | 'later' | 'all' | 'attachments' | 'newsletters' | 'notifications';
+  setCurrentView: (view: 'attention' | 'waiting' | 'later' | 'all' | 'attachments' | 'newsletters' | 'notifications') => void;
   clearToast: () => void;
 }
 
@@ -118,11 +118,22 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
   // Filter based on view
   let filteredConvos = convos;
   if (currentView === 'attention') {
-    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX') && !m.labels?.includes('WAITING') && !m.labels?.includes('LATER') && !m.labels?.includes('SNOOZED')));
+    filteredConvos = convos.filter(c => c.messages.some(m => 
+      m.labels?.includes('INBOX') && 
+      !m.labels?.includes('WAITING') && 
+      !m.labels?.includes('LATER') && 
+      !m.labels?.includes('SNOOZED') &&
+      m.category !== 'newsletter' &&
+      m.category !== 'notification'
+    ));
   } else if (currentView === 'waiting') {
     filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('WAITING')));
   } else if (currentView === 'later') {
     filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('LATER')));
+  } else if (currentView === 'newsletters') {
+    filteredConvos = convos.filter(c => c.messages.some(m => m.category === 'newsletter' && m.labels?.includes('INBOX')));
+  } else if (currentView === 'notifications') {
+    filteredConvos = convos.filter(c => c.messages.some(m => m.category === 'notification' && m.labels?.includes('INBOX')));
   }
   
   filteredConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());

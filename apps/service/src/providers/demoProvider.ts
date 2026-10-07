@@ -77,6 +77,38 @@ export class DemoProvider implements IProviderAdapter {
           }
         ]
       },
+      {
+        id: 'msg-3',
+        providerId: 'demo-prov-3',
+        threadId: 'thread-3',
+        from: { name: 'Weekly Newsletter', email: 'news@update.com' },
+        to: [{ email: 'me@mail.local' }],
+        cc: [],
+        bcc: [],
+        subject: 'Your Weekly Summary',
+        snippet: 'Here is what happened this week...',
+        bodyHtml: '<p>Here is what happened this week...</p>',
+        date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+        labels: ['INBOX'],
+        hasAttachments: false,
+        category: 'newsletter',
+      },
+      {
+        id: 'msg-4',
+        providerId: 'demo-prov-4',
+        threadId: 'thread-4',
+        from: { name: 'GitHub', email: 'notifications@github.com' },
+        to: [{ email: 'me@mail.local' }],
+        cc: [],
+        bcc: [],
+        subject: '[Gagann-09/Mail] New PR opened',
+        snippet: 'A new pull request was opened by alice...',
+        bodyHtml: '<p>A new pull request was opened by alice...</p>',
+        date: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
+        labels: ['INBOX'],
+        hasAttachments: false,
+        category: 'notification',
+      }
     ];
   }
 
