@@ -42,6 +42,7 @@ interface MailState {
   archiveConversation: (threadId: string) => Promise<void>;
   trashConversation: (threadId: string) => Promise<void>;
   spamConversation: (threadId: string) => void;
+  toggleWaiting: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
   currentView: 'attention' | 'waiting' | 'later' | 'all';
@@ -90,7 +91,9 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
 let pendingActionTimeout: any = null;
 let commitPendingAction: (() => void) | null = null;
 
-function handleOptimisticMutate(threadId: string, action: 'archive' | 'trash' | 'spam', toastText: string) {
+type MutateAction = 'archive' | 'trash' | 'spam' | 'waiting' | 'remove_waiting';
+
+function handleOptimisticMutate(threadId: string, action: MutateAction, toastText: string) {
   const state = useMailStore.getState();
   const convo = state.conversations.find(c => c.id === threadId);
   if (!convo) return;
@@ -98,12 +101,43 @@ function handleOptimisticMutate(threadId: string, action: 'archive' | 'trash' | 
   
   if (commitPendingAction) commitPendingAction();
 
-  const originalConvos = state.conversations;
+  const originalMessages = state.messages;
   const originalSelectedId = state.selectedConversationId;
+  
+  // Optimistically update labels in messages
+  const newMessages = state.messages.map(m => {
+    if (m.threadId !== threadId) return m;
+    const newLabels = [...(m.labels || [])];
+    
+    if (action === 'archive') {
+      const idx = newLabels.indexOf('INBOX');
+      if (idx > -1) newLabels.splice(idx, 1);
+      if (!newLabels.includes('ARCHIVE')) newLabels.push('ARCHIVE');
+    } else if (action === 'trash') {
+      const inIdx = newLabels.indexOf('INBOX');
+      if (inIdx > -1) newLabels.splice(inIdx, 1);
+      if (!newLabels.includes('TRASH')) newLabels.push('TRASH');
+    } else if (action === 'spam') {
+      const inIdx = newLabels.indexOf('INBOX');
+      if (inIdx > -1) newLabels.splice(inIdx, 1);
+      if (!newLabels.includes('SPAM')) newLabels.push('SPAM');
+    } else if (action === 'waiting') {
+      if (!newLabels.includes('WAITING')) newLabels.push('WAITING');
+    } else if (action === 'remove_waiting') {
+      const wIdx = newLabels.indexOf('WAITING');
+      if (wIdx > -1) newLabels.splice(wIdx, 1);
+    }
+    
+    return { ...m, labels: newLabels };
+  });
+
+  const newConversations = computeConversations(newMessages, state.currentView);
+  const stillInView = newConversations.some(c => c.id === threadId);
 
   useMailStore.setState({
-    conversations: state.conversations.filter(c => c.id !== threadId),
-    selectedConversationId: state.selectedConversationId === threadId ? null : state.selectedConversationId,
+    messages: newMessages,
+    conversations: newConversations,
+    selectedConversationId: stillInView ? state.selectedConversationId : null,
     toastMessage: toastText
   });
 
@@ -130,7 +164,12 @@ function handleOptimisticMutate(threadId: string, action: 'archive' | 'trash' | 
       if (pendingActionTimeout) clearTimeout(pendingActionTimeout);
       if (commitPendingAction === commitApi) {
         commitPendingAction = null;
-        useMailStore.setState({ conversations: originalConvos, selectedConversationId: originalSelectedId });
+        const revertedConversations = computeConversations(originalMessages, state.currentView);
+        useMailStore.setState({ 
+          messages: originalMessages,
+          conversations: revertedConversations, 
+          selectedConversationId: originalSelectedId 
+        });
         useMailStore.getState().clearToast();
       }
     }
@@ -186,6 +225,12 @@ export const useMailStore = create<MailState>((set) => ({
   archiveConversation: (threadId) => handleOptimisticMutate(threadId, 'archive', 'Conversation archived'),
   trashConversation: (threadId) => handleOptimisticMutate(threadId, 'trash', 'Conversation moved to trash'),
   spamConversation: (threadId) => handleOptimisticMutate(threadId, 'spam', 'Conversation marked as spam'),
+  toggleWaiting: (threadId) => {
+    const convo = useMailStore.getState().conversations.find(c => c.id === threadId);
+    if (!convo) return;
+    const isWaiting = convo.messages.some(m => m.labels?.includes('WAITING'));
+    handleOptimisticMutate(threadId, isWaiting ? 'remove_waiting' : 'waiting', isWaiting ? 'Removed from waiting' : 'Marked as waiting');
+  },
   fetchMessages: async () => {
     set({ loading: true, error: null });
     try {

@@ -36,5 +36,5 @@ export interface IProviderAdapter {
    * Mutates a message's state on the provider side (e.g., mark read, archive).
    * Note: The adapter must map our abstract 'action' to the provider's specific label/folder mechanisms.
    */
-  mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread'): Promise<void>;
+  mutateMessage(providerId: string, action: 'archive' | 'trash' | 'spam' | 'read' | 'unread' | 'waiting' | 'remove_waiting'): Promise<void>;
 }

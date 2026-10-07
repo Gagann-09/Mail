@@ -248,4 +248,36 @@ describe('MessageDetail', () => {
     spamBtn.click();
     expect(mockSpam).toHaveBeenCalledWith('t-1');
   });
+  it('calls toggleWaiting when Waiting button is clicked', () => {
+    const mockToggleWaiting = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn(),
+      trashConversation: vi.fn(),
+      spamConversation: vi.fn(),
+      toggleWaiting: mockToggleWaiting
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ toggleWaiting: mockToggleWaiting });
+
+    render(<MessageDetail />);
+    const waitingBtn = screen.getByTestId('waiting-btn');
+    waitingBtn.click();
+    expect(mockToggleWaiting).toHaveBeenCalledWith('t-1');
+  });
 });
