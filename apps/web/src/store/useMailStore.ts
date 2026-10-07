@@ -44,12 +44,17 @@ interface MailState {
   spamConversation: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
+  currentView: 'attention' | 'waiting' | 'later' | 'all';
+  setCurrentView: (view: 'attention' | 'waiting' | 'later' | 'all') => void;
   clearToast: () => void;
 }
 
-function computeConversations(messages: LocalMessage[]): LocalConversation[] {
+function computeConversations(messages: LocalMessage[], currentView: 'attention' | 'waiting' | 'later' | 'all'): LocalConversation[] {
   const map = new Map<string, LocalMessage[]>();
-  messages.forEach(msg => {
+  // Pre-filter out trash and spam for all standard views
+  const validMessages = messages.filter(m => !m.labels?.includes('TRASH') && !m.labels?.includes('SPAM'));
+  
+  validMessages.forEach(msg => {
     if (!map.has(msg.threadId)) {
       map.set(msg.threadId, []);
     }
@@ -68,11 +73,18 @@ function computeConversations(messages: LocalMessage[]): LocalConversation[] {
     });
   });
   
-  // Filter for INBOX only
-  const inboxConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX')));
+  // Filter based on view
+  let filteredConvos = convos;
+  if (currentView === 'attention') {
+    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('INBOX') && !m.labels?.includes('WAITING') && !m.labels?.includes('LATER')));
+  } else if (currentView === 'waiting') {
+    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('WAITING')));
+  } else if (currentView === 'later') {
+    filteredConvos = convos.filter(c => c.messages.some(m => m.labels?.includes('LATER')));
+  }
   
-  inboxConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  return inboxConvos;
+  filteredConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return filteredConvos;
 }
 
 let pendingActionTimeout: any = null;
@@ -137,6 +149,12 @@ export const useMailStore = create<MailState>((set) => ({
   selectedConversationId: null,
   toastMessage: null,
   undoAction: null,
+  currentView: 'attention',
+  setCurrentView: (view) => set((state) => ({ 
+    currentView: view, 
+    conversations: computeConversations(state.messages, view),
+    selectedConversationId: null // Reset selection on view change
+  })),
   clearToast: () => set({ toastMessage: null, undoAction: null }),
   selectConversation: (id) => set({ selectedConversationId: id }),
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -183,13 +201,15 @@ export const useMailStore = create<MailState>((set) => ({
 
       // Update React State
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
-      const conversations = computeConversations(allMessages);
+      const state = useMailStore.getState();
+      const conversations = computeConversations(allMessages, state.currentView);
       set({ messages: allMessages, conversations, loading: false });
     } catch (err) {
       console.error(err);
       // Fallback to local DB if offline or error
       const allMessages = await db.messages.orderBy('date').reverse().toArray();
-      const conversations = computeConversations(allMessages);
+      const state = useMailStore.getState();
+      const conversations = computeConversations(allMessages, state.currentView);
       set({ 
         messages: allMessages, 
         conversations,

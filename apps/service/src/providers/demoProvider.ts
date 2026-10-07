@@ -43,7 +43,7 @@ export class DemoProvider implements IProviderAdapter {
         snippet: 'Thanks Alice, glad to be here!',
         bodyHtml: '<p>Thanks Alice, glad to be here!</p>',
         date: new Date(Date.now() - 1000 * 60 * 50), // 50 mins ago
-        labels: ['INBOX'],
+        labels: ['INBOX', 'WAITING'],
         hasAttachments: false,
       },
       {
@@ -58,7 +58,7 @@ export class DemoProvider implements IProviderAdapter {
         snippet: 'Please click the link below to verify your account.',
         bodyHtml: '<p>Please click the link below to verify your account.</p><a href="#">Verify Now</a>',
         date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        labels: ['INBOX'],
+        labels: ['INBOX', 'LATER'],
         hasAttachments: true,
         attachments: [
           {

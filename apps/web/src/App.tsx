@@ -4,7 +4,7 @@ import { Composer } from './features/compose/Composer';
 import { useMailStore } from './store/useMailStore';
 
 export function App() {
-  const { isComposing, setComposing, searchQuery, setSearchQuery, toastMessage, undoAction, selectedConversationId } = useMailStore();
+  const { isComposing, setComposing, searchQuery, setSearchQuery, toastMessage, undoAction, selectedConversationId, currentView, setCurrentView } = useMailStore();
 
   return (
     <div className="app-container" data-view={selectedConversationId ? 'detail' : 'list'}>
@@ -21,10 +21,38 @@ export function App() {
         </button>
 
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: '3px solid var(--text-high)', fontWeight: 500 }}>Attention</button></li>
-          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Waiting</button></li>
-          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>Later</button></li>
-          <li><button style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', color: 'var(--text-medium)' }}>All Mail</button></li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('attention')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: currentView === 'attention' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'attention' ? 600 : 500, color: currentView === 'attention' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Attention
+            </button>
+          </li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('waiting')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: currentView === 'waiting' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'waiting' ? 600 : 500, color: currentView === 'waiting' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Waiting
+            </button>
+          </li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('later')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: currentView === 'later' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'later' ? 600 : 500, color: currentView === 'later' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              Later
+            </button>
+          </li>
+          <li>
+            <button 
+              onClick={() => setCurrentView('all')}
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: 'var(--space-2) var(--space-3)', cursor: 'pointer', borderLeft: currentView === 'all' ? '3px solid var(--text-high)' : '3px solid transparent', fontWeight: currentView === 'all' ? 600 : 500, color: currentView === 'all' ? 'var(--text-high)' : 'var(--text-medium)' }}
+            >
+              All Mail
+            </button>
+          </li>
         </ul>
       </nav>
       

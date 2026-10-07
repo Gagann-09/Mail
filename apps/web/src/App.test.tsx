@@ -18,6 +18,8 @@ vi.mock('./store/useMailStore', () => ({
     setSearchQuery: vi.fn(),
     toastMessage: null,
     undoAction: null,
+    currentView: 'attention',
+    setCurrentView: vi.fn(),
   })),
 }));
 
