@@ -38,7 +38,7 @@ messagesRouter.post('/mutate', async (req: Request, res: Response): Promise<void
       return;
     }
     
-    const validActions = ['archive', 'trash', 'spam', 'read', 'unread', 'waiting', 'remove_waiting'];
+    const validActions = ['archive', 'trash', 'spam', 'read', 'unread', 'waiting', 'remove_waiting', 'later', 'remove_later'];
     if (!validActions.includes(action)) {
       res.status(400).json({ success: false, error: 'Invalid action' });
       return;

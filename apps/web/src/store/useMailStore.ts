@@ -43,6 +43,7 @@ interface MailState {
   trashConversation: (threadId: string) => Promise<void>;
   spamConversation: (threadId: string) => void;
   toggleWaiting: (threadId: string) => void;
+  toggleLater: (threadId: string) => void;
   toastMessage: string | null;
   undoAction: (() => void) | null;
   currentView: 'attention' | 'waiting' | 'later' | 'all';
@@ -91,7 +92,7 @@ function computeConversations(messages: LocalMessage[], currentView: 'attention'
 let pendingActionTimeout: any = null;
 let commitPendingAction: (() => void) | null = null;
 
-type MutateAction = 'archive' | 'trash' | 'spam' | 'waiting' | 'remove_waiting';
+type MutateAction = 'archive' | 'trash' | 'spam' | 'waiting' | 'remove_waiting' | 'later' | 'remove_later';
 
 function handleOptimisticMutate(threadId: string, action: MutateAction, toastText: string) {
   const state = useMailStore.getState();
@@ -125,6 +126,11 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
       if (!newLabels.includes('WAITING')) newLabels.push('WAITING');
     } else if (action === 'remove_waiting') {
       const wIdx = newLabels.indexOf('WAITING');
+      if (wIdx > -1) newLabels.splice(wIdx, 1);
+    } else if (action === 'later') {
+      if (!newLabels.includes('LATER')) newLabels.push('LATER');
+    } else if (action === 'remove_later') {
+      const wIdx = newLabels.indexOf('LATER');
       if (wIdx > -1) newLabels.splice(wIdx, 1);
     }
     
@@ -230,6 +236,12 @@ export const useMailStore = create<MailState>((set) => ({
     if (!convo) return;
     const isWaiting = convo.messages.some(m => m.labels?.includes('WAITING'));
     handleOptimisticMutate(threadId, isWaiting ? 'remove_waiting' : 'waiting', isWaiting ? 'Removed from waiting' : 'Marked as waiting');
+  },
+  toggleLater: (threadId) => {
+    const convo = useMailStore.getState().conversations.find(c => c.id === threadId);
+    if (!convo) return;
+    const isLater = convo.messages.some(m => m.labels?.includes('LATER'));
+    handleOptimisticMutate(threadId, isLater ? 'remove_later' : 'later', isLater ? 'Removed from later' : 'Marked for later');
   },
   fetchMessages: async () => {
     set({ loading: true, error: null });

@@ -42,6 +42,13 @@ export function MessageDetail() {
         </div>
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           <button
+            data-testid="later-btn"
+            onClick={() => useMailStore.getState().toggleLater(conversation.id)}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: conversation.messages.some(m => m.labels?.includes('LATER')) ? 'var(--bg-secondary)' : 'transparent', color: 'var(--text-high)', cursor: 'pointer', fontWeight: 500 }}
+          >
+            {conversation.messages.some(m => m.labels?.includes('LATER')) ? 'Remove Later' : 'Mark Later'}
+          </button>
+          <button
             data-testid="waiting-btn"
             onClick={() => useMailStore.getState().toggleWaiting(conversation.id)}
             style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: conversation.messages.some(m => m.labels?.includes('WAITING')) ? 'var(--bg-secondary)' : 'transparent', color: 'var(--text-high)', cursor: 'pointer', fontWeight: 500 }}

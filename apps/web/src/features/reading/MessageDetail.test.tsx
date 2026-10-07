@@ -280,4 +280,37 @@ describe('MessageDetail', () => {
     waitingBtn.click();
     expect(mockToggleWaiting).toHaveBeenCalledWith('t-1');
   });
+  it('calls toggleLater when Later button is clicked', () => {
+    const mockToggleLater = vi.fn();
+    vi.mocked(storeModule.useMailStore).mockReturnValue({
+      messages: [],
+      conversations: [mockConvo],
+      selectedConversationId: 't-1',
+      loading: false,
+      error: null,
+      isComposing: false,
+      composeDefaults: null,
+      drafts: {},
+      searchQuery: '',
+      setSearchQuery: vi.fn(),
+      fetchMessages: vi.fn(),
+      selectConversation: vi.fn(),
+      setComposing: vi.fn(),
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      sendMessage: vi.fn(),
+      archiveConversation: vi.fn(),
+      trashConversation: vi.fn(),
+      spamConversation: vi.fn(),
+      toggleWaiting: vi.fn(),
+      toggleLater: mockToggleLater
+    });
+    
+    storeModule.useMailStore.getState = vi.fn().mockReturnValue({ toggleLater: mockToggleLater });
+
+    render(<MessageDetail />);
+    const laterBtn = screen.getByTestId('later-btn');
+    laterBtn.click();
+    expect(mockToggleLater).toHaveBeenCalledWith('t-1');
+  });
 });
