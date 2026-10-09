@@ -19,11 +19,20 @@ messagesRouter.get('/', async (req: Request, res: Response): Promise<void> => {
 messagesRouter.post('/send', async (req: Request, res: Response): Promise<void> => {
   try {
     const { to, subject, body, threadId, isWaiting, isScheduled } = req.body;
-    if (!to || !subject || !body) {
-      res.status(400).json({ success: false, error: 'Missing required fields' });
+    
+    // Strict type validation
+    if (!to || !subject || typeof subject !== 'string' || !body || typeof body !== 'string') {
+      res.status(400).json({ success: false, error: 'Missing or invalid required fields' });
       return;
     }
-    await provider.sendMessage({ to: Array.isArray(to) ? to : [to], subject, body, threadId, isWaiting, isScheduled });
+    
+    const toArray = Array.isArray(to) ? to : [to];
+    if (!toArray.every(t => typeof t === 'string')) {
+      res.status(400).json({ success: false, error: 'Invalid recipient format' });
+      return;
+    }
+
+    await provider.sendMessage({ to: toArray, subject, body, threadId, isWaiting, isScheduled });
     res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to send message' });
@@ -33,8 +42,8 @@ messagesRouter.post('/send', async (req: Request, res: Response): Promise<void> 
 messagesRouter.post('/mutate', async (req: Request, res: Response): Promise<void> => {
   try {
     const { providerIds, action } = req.body;
-    if (!providerIds || !Array.isArray(providerIds) || !action) {
-      res.status(400).json({ success: false, error: 'Missing required fields' });
+    if (!providerIds || !Array.isArray(providerIds) || !providerIds.every(id => typeof id === 'string') || !action || typeof action !== 'string') {
+      res.status(400).json({ success: false, error: 'Missing or invalid required fields' });
       return;
     }
     

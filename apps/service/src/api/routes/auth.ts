@@ -7,8 +7,8 @@ export const authRouter = Router();
 authRouter.post('/callback', async (req: Request, res: Response): Promise<void> => {
   try {
     const { authCode } = req.body;
-    if (!authCode) {
-      res.status(400).json({ error: 'Missing authCode' });
+    if (!authCode || typeof authCode !== 'string') {
+      res.status(400).json({ error: 'Missing or invalid authCode' });
       return;
     }
 
