@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 import DOMPurify from 'dompurify';
 
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A') {
+    node.setAttribute('target', '_blank');
+    node.setAttribute('rel', 'noopener noreferrer');
+  }
+});
+
 export function MessageDetail() {
   const { conversations, selectedConversationId } = useMailStore();
   const [showAISummary, setShowAISummary] = useState(false);
@@ -160,7 +167,7 @@ export function MessageDetail() {
             <div 
               style={{ color: 'var(--text-high)', fontSize: '15px', lineHeight: 1.6 }}
               data-testid={`message-body-${message.id}`}
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.bodyHtml || message.snippet || '') }} 
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.bodyHtml || message.snippet || '', { FORBID_TAGS: ['style'] }) }} 
             />
           </div>
         ))}
