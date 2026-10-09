@@ -13,6 +13,7 @@ export function Composer() {
   const [isWaiting, setIsWaiting] = useState(existingDraft?.isWaiting ?? false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Auto-save draft on change
   useEffect(() => {
@@ -142,6 +143,32 @@ export function Composer() {
             }}
           >
             Schedule Send
+          </button>
+          
+          <button 
+            data-testid="composer-ai-draft"
+            onClick={() => {
+              setIsGenerating(true);
+              setTimeout(() => {
+                setBody(body ? body + '\n\n[AI Improved: More professional tone applied.]' : 'Here is an AI-generated draft based on the thread context...');
+                setIsGenerating(false);
+              }, 500);
+            }}
+            disabled={isSending || isGenerating}
+            style={{ 
+              backgroundColor: 'var(--bg-secondary)', 
+              color: 'var(--text-high)', 
+              border: 'var(--border-default)', 
+              padding: 'var(--space-2) var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              cursor: isSending || isGenerating ? 'not-allowed' : 'pointer',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-1)'
+            }}
+          >
+            {isGenerating ? 'Generating...' : '✨ AI Assist'}
           </button>
           
           <button 

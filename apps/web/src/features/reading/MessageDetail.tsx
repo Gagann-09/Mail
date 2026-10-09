@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 import DOMPurify from 'dompurify';
 
 export function MessageDetail() {
   const { conversations, selectedConversationId } = useMailStore();
+  const [showAISummary, setShowAISummary] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const conversation = conversations.find(c => c.id === selectedConversationId);
 
@@ -41,6 +44,21 @@ export function MessageDetail() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <button
+            data-testid="ai-summarize-btn"
+            onClick={() => {
+              if (showAISummary) {
+                setShowAISummary(false);
+              } else {
+                setIsSummarizing(true);
+                setShowAISummary(true);
+                setTimeout(() => setIsSummarizing(false), 800);
+              }
+            }}
+            style={{ padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border-default)', backgroundColor: showAISummary ? 'var(--bg-secondary)' : 'transparent', color: 'var(--text-high)', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
+          >
+            ✨ {showAISummary ? 'Hide Summary' : 'Summarize'}
+          </button>
           <button
             data-testid="snooze-btn"
             onClick={() => useMailStore.getState().toggleSnooze(conversation.id)}
@@ -96,6 +114,24 @@ export function MessageDetail() {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {showAISummary && (
+        <div data-testid="ai-summary-block" style={{ padding: 'var(--space-4)', marginBottom: 'var(--space-4)', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', fontSize: '14px' }}>
+          <strong style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--text-high)' }}>✨ AI Thread Summary</strong>
+          {isSummarizing ? (
+            <div style={{ color: 'var(--text-medium)', fontStyle: 'italic' }}>Analyzing thread context...</div>
+          ) : (
+            <div style={{ color: 'var(--text-medium)' }}>
+              <p style={{ margin: '0 0 var(--space-2) 0' }}>Based on {conversation.messages.length} messages in this thread:</p>
+              <ul style={{ margin: 0, paddingLeft: 'var(--space-4)' }}>
+                <li style={{ marginBottom: 'var(--space-1)' }}>The sender provided an update.</li>
+                <li style={{ marginBottom: 'var(--space-1)' }}>No immediate action is required.</li>
+                <li>Key context was exchanged regarding <strong>{conversation.subject}</strong>.</li>
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
