@@ -222,7 +222,14 @@ function handleOptimisticMutate(threadId: string, action: MutateAction, toastTex
 
   const commitApi = async () => {
     try {
-      const response = await fetch('/api/messages/mutate', { method: 'POST', body: JSON.stringify({ providerIds, action }), headers: { 'Content-Type': 'application/json' } });
+      const response = await fetch('/api/messages/mutate', { 
+        method: 'POST', 
+        body: JSON.stringify({ providerIds, action }), 
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        } 
+      });
       if (!response.ok) throw new Error(`${action} failed`);
       await useMailStore.getState().fetchMessages();
     } catch (err) {
@@ -295,7 +302,10 @@ export const useMailStore = create<MailState>((set) => ({
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         body: JSON.stringify({ to, subject, body, isWaiting, threadId, isScheduled })
       });
       if (!response.ok) {
