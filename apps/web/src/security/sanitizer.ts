@@ -30,6 +30,11 @@ const FORBIDDEN_TAGS = [
 // Attributes that are explicitly forbidden
 const FORBIDDEN_ATTR = [
   'style', // Block all style attributes to prevent CSS-based XSS
+  'download', // Prevent forced downloads
+  'hreflang', // Prevent language tracking
+  'type', // Prevent MIME type confusion
+  'ping', // Prevent tracking pings
+  'referrerpolicy', // Prevent referrer manipulation
   'onload', 'onerror', 'onclick', 'onmouseover', 'onmouseout',
   'onfocus', 'onblur', 'onchange', 'onsubmit', 'onreset',
   'onselect', 'onkeydown', 'onkeyup', 'onkeypress',
