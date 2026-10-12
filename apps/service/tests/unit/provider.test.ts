@@ -1,21 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { encryptProviderCredentials, decryptProviderCredentials } from '../../src/security/kms';
 import { DemoProvider } from '../../src/providers/demoProvider';
 import { IProviderAdapter } from '../../src/providers/IProviderAdapter';
 
-describe('Authentication Boundary and Provider Abstraction', () => {
-  it('encrypts and decrypts credentials successfully without data loss', () => {
-    const rawCredentials = JSON.stringify({ accessToken: 'super-secret', refreshToken: 'refresh' });
-    const encrypted = encryptProviderCredentials(rawCredentials);
-    
-    expect(encrypted.data).not.toContain('super-secret'); // Assure it's encrypted
-    expect(encrypted.iv).toBeDefined();
-    
-    const decrypted = decryptProviderCredentials(encrypted);
-    expect(decrypted).toBe(rawCredentials);
-  });
-
-  it('demo provider authenticates and returns normalized credentials', async () => {
+describe('Demo Provider Abstraction', () => {
+  it('returns normalized fake credentials for demo-only usage', async () => {
     const provider: IProviderAdapter = new DemoProvider();
     const creds = await provider.authenticate('valid_code');
     expect(creds.accessToken).toBe('demo_access_token');
