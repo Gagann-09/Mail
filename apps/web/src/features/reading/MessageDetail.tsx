@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMailStore } from '../../store/useMailStore';
 import { sanitizeEmailHtml } from '../../security/sanitizer';
+import { assessAttachmentSafety } from '../../security/attachment-safety';
 
 export function MessageDetail() {
   const { conversations, selectedConversationId } = useMailStore();
@@ -149,12 +150,26 @@ export function MessageDetail() {
             </div>
             {message.hasAttachments && message.attachments && message.attachments.length > 0 && (
               <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
-                {message.attachments.map(att => (
-                  <div key={att.id} data-testid={`attachment-${att.id}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-secondary)', fontSize: '13px' }}>
-                    <span style={{ fontWeight: 500 }}>{att.filename}</span>
-                    <span style={{ color: 'var(--text-medium)' }}>({Math.round(att.size / 1024)} KB)</span>
-                  </div>
-                ))}
+                {message.attachments.map(att => {
+                  const safety = assessAttachmentSafety(att, window.location.origin);
+
+                  return (
+                    <div key={att.id} data-testid={`attachment-${att.id}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-secondary)', fontSize: '13px' }}>
+                      <span style={{ fontWeight: 500 }}>{safety.sanitizedFilename}</span>
+                      <span style={{ color: 'var(--text-medium)' }}>({Math.round(safety.sanitizedSize / 1024)} KB)</span>
+                      {safety.errors.length > 0 && (
+                        <span data-testid={`attachment-errors-${att.id}`} role="alert" style={{ color: 'var(--status-destructive)' }}>
+                          Attachment metadata blocked
+                        </span>
+                      )}
+                      {safety.errors.length === 0 && safety.warnings.length > 0 && (
+                        <span data-testid={`attachment-warnings-${att.id}`} role="status" style={{ color: 'var(--text-medium)' }}>
+                          Attachment caution
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
             <div 

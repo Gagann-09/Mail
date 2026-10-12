@@ -89,6 +89,7 @@ describe('AttachmentList', () => {
     render(<AttachmentList />);
     expect(screen.getByTestId('attachment-list')).toBeDefined();
     expect(screen.getByText('report.pdf')).toBeDefined();
+    expect(screen.getByTestId('attachment-warnings-att-1')).toHaveTextContent('Potentially risky file type: .pdf');
     expect(screen.getByText('10 KB • application/pdf')).toBeDefined();
   });
 

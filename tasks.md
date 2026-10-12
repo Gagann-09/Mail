@@ -267,7 +267,7 @@ STOP.
 - [x] injection audit.
 - [x] HTML isolation audit.
 - [x] link safety audit.
-- [ ] attachment safety audit.
+- [x] attachment safety audit.
 - [ ] authentication audit.
 - [ ] authorization audit.
 - [ ] session audit.
